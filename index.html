@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>瑪奇 Mobile - 多分身週常進度管理</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '#286C77',
+              hover: '#1e535c',
+              light: '#3d8692',
+              glow: 'rgba(40, 108, 119, 0.25)'
+            },
+            palette: {
+              teal: '#286C77',
+              lightgray: '#D6D6D6',
+              gray: '#707070',
+              bgdark: '#222527',      /* 深色護眼背景，告別刺眼白底 */
+              carddark: '#2c3033',    /* 沉穩卡片底色 */
+              cardhover: '#34383c'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #222527;
+      color: #e5e7eb;
+      font-size: 1.1rem;
+      letter-spacing: 0.02em;
+    }
+    /* 自訂大號複選框 */
+    .custom-checkbox {
+      appearance: none;
+      width: 1.7rem;
+      height: 1.7rem;
+      border: 2px solid #707070;
+      border-radius: 0.45rem;
+      display: inline-grid;
+      place-content: center;
+      cursor: pointer;
+      background-color: #1a1c1d;
+      transition: all 0.15s ease-in-out;
+    }
+    .custom-checkbox:hover {
+      border-color: #286C77;
+    }
+    .custom-checkbox:checked {
+      background-color: #286C77;
+      border-color: #3d8692;
+    }
+    .custom-checkbox:checked::before {
+      content: "\f00c";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      font-size: 1.05rem;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-20">
+
+  <!-- 置頂倒數橫幅 (Sticky Top) -->
+  <header class="sticky top-0 z-40 bg-[#1b434a] text-white shadow-xl border-b border-[#286C77]">
+    <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-shield-halved text-2xl text-[#88d0dc]"></i>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold tracking-wide">瑪奇 Mobile 多分身進度追蹤</h1>
+          <p class="text-xs sm:text-sm text-[#D6D6D6]/80">每週一 06:00:00 自動重置週期</p>
+        </div>
+      </div>
+
+      <!-- 倒數計時器模組 -->
+      <div class="flex items-center gap-3 bg-[#132c31] px-4 py-2 rounded-lg border border-[#286C77]/60 shadow-inner">
+        <div class="text-sm font-medium text-[#D6D6D6] flex items-center gap-2">
+          <i class="fa-regular fa-clock animate-pulse text-[#88d0dc]"></i>
+          <span>距離週重置：</span>
+        </div>
+        <div id="resetCountdown" class="font-mono text-lg sm:text-xl font-bold text-amber-300">
+          計算中...
+        </div>
+      </div>
+
+      <!-- 動作按鈕群組 -->
+      <div class="flex items-center gap-2">
+        <button onclick="confirmResetWeek()" class="bg-[#286C77] hover:bg-[#1e535c] text-white font-medium text-sm px-3.5 py-2 rounded-lg border border-[#3d8692] transition flex items-center gap-1.5 shadow">
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span>手動重置本週</span>
+        </button>
+        <button onclick="openModal('addCharModal')" class="bg-[#D6D6D6] hover:bg-white text-[#1b434a] font-bold text-sm px-4 py-2 rounded-lg shadow transition flex items-center gap-1.5">
+          <i class="fa-solid fa-user-plus"></i>
+          <span>新增角色</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 總進度狀態條 -->
+  <main class="max-w-7xl mx-auto px-4 mt-6">
+    <div class="bg-[#2c3033] rounded-xl p-4 sm:p-5 shadow-lg border border-[#707070]/40 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="w-full sm:w-2/3">
+        <div class="flex justify-between items-center mb-2">
+          <span class="font-bold text-[#D6D6D6] text-base sm:text-lg flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-[#88d0dc]"></i> 全分身本週完成率
+          </span>
+          <span id="overallPercentage" class="font-bold text-[#88d0dc] text-lg font-mono">0%</span>
+        </div>
+        <div class="w-full bg-[#1a1c1d] rounded-full h-4 overflow-hidden border border-[#707070]/30">
+          <div id="overallProgressBar" class="bg-[#286C77] h-full transition-all duration-300 rounded-full" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- 檢視切換與資料備份 -->
+      <div class="flex items-center gap-2 self-end sm:self-center">
+        <div class="inline-flex rounded-lg border border-[#707070]/60 p-1 bg-[#1a1c1d] text-sm">
+          <button id="viewCardBtn" onclick="setViewMode('card')" class="px-3 py-1.5 rounded-md font-semibold bg-[#286C77] text-white">
+            <i class="fa-solid fa-grip mr-1"></i> 卡片檢視
+          </button>
+          <button id="viewTableBtn" onclick="setViewMode('table')" class="px-3 py-1.5 rounded-md font-semibold text-[#D6D6D6] hover:text-white">
+            <i class="fa-solid fa-table-list mr-1"></i> 矩陣總覽
+          </button>
+        </div>
+        <button onclick="exportData()" title="匯出備份 JSON" class="p-2 border border-[#707070]/60 rounded-lg text-[#D6D6D6] hover:bg-[#34383c] transition">
+          <i class="fa-solid fa-file-export"></i>
+        </button>
+        <button onclick="document.getElementById('importFile').click()" title="匯入備份 JSON" class="p-2 border border-[#707070]/60 rounded-lg text-[#D6D6D6] hover:bg-[#34383c] transition">
+          <i class="fa-solid fa-file-import"></i>
+        </button>
+        <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
+      </div>
+    </div>
+
+    <!-- 卡片檢視模式 -->
+    <div id="cardViewContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+    <!-- 表格矩陣模式 -->
+    <div id="tableViewContainer" class="hidden bg-[#2c3033] rounded-xl shadow-lg border border-[#707070]/40 overflow-x-auto">
+      <table class="w-full text-left border-collapse min-w-[950px]">
+        <thead>
+          <tr class="bg-[#1b434a] text-white text-base border-b border-[#286C77]">
+            <th class="py-3.5 px-4 font-semibold w-48">角色名稱 / 職業</th>
+            <th class="py-3.5 px-3 font-semibold text-center">格里斯貝恩</th>
+            <th class="py-3.5 px-3 font-semibold text-center">白魅魔</th>
+            <th class="py-3.5 px-3 font-semibold text-center">深淵副本</th>
+            <th class="py-3.5 px-3 font-semibold text-center">布告欄</th>
+            <th class="py-3.5 px-3 font-semibold text-center">結界打乾淨</th>
+            <th class="py-3.5 px-3 font-semibold text-center">黑洞打乾淨</th>
+            <th class="py-3.5 px-4 font-semibold min-w-[220px]">聽牌的符文</th>
+            <th class="py-3.5 px-3 font-semibold text-center w-24">操作</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody" class="divide-y divide-[#707070]/30 text-base"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- 新增/編輯角色彈窗 -->
+  <div id="addCharModal" class="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 hidden backdrop-blur-xs">
+    <div class="bg-[#2c3033] rounded-xl max-w-md w-full p-6 shadow-2xl border border-[#707070]">
+      <h2 id="modalTitle" class="text-xl font-bold text-[#88d0dc] mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-user-plus"></i> <span>新增分身角色</span>
+      </h2>
+      <input type="hidden" id="editCharId" value="">
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-[#D6D6D6] mb-1">角色名稱</label>
+          <input type="text" id="charNameInput" placeholder="例如：工具人三號" class="w-full bg-[#1a1c1d] border border-[#707070] text-white rounded-lg px-3 py-2.5 text-base focus:outline-none focus:border-[#286C77]">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-[#D6D6D6] mb-1">職業分支 (18大轉職)</label>
+          <select id="charClassSelect" class="w-full bg-[#1a1c1d] border border-[#707070] text-white rounded-lg px-3 py-2.5 text-base focus:outline-none focus:border-[#286C77]">
+            <optgroup label="戰士系列">
+              <option value="大劍戰士（大劍）">大劍戰士（大劍）</option>
+              <option value="戰士">戰士</option>
+              <option value="劍術士">劍術士</option>
+            </optgroup>
+            <optgroup label="弓手系列">
+              <option value="長弓兵">長弓兵</option>
+              <option value="弓手">弓手</option>
+              <option value="弩手">弩手</option>
+            </optgroup>
+            <optgroup label="魔法師系列">
+              <option value="冰霜術士">冰霜術士</option>
+              <option value="火焰術士">火焰術士</option>
+              <option value="電擊術士">電擊術士</option>
+              <option value="魔法師">魔法師</option>
+            </optgroup>
+            <optgroup label="治癒師系列">
+              <option value="治癒師">治癒師</option>
+              <option value="祭司">祭司</option>
+              <option value="修道士">修道士</option>
+            </optgroup>
+            <optgroup label="吟遊詩人系列">
+              <option value="舞者">舞者</option>
+              <option value="吟遊詩人">吟遊詩人</option>
+              <option value="樂師">樂師</option>
+            </optgroup>
+            <optgroup label="盜賊系列">
+              <option value="雙刀客">雙刀客</option>
+              <option value="格鬥家">格鬥家</option>
+              <option value="盜賊">盜賊</option>
+            </optgroup>
+          </select>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end gap-3">
+        <button onclick="closeModal('addCharModal')" class="px-4 py-2 text-[#D6D6D6] font-semibold hover:bg-[#34383c] rounded-lg transition">取消</button>
+        <button onclick="saveCharacter()" class="px-5 py-2 bg-[#286C77] hover:bg-[#1e535c] text-white font-bold rounded-lg shadow transition">儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_CHARACTERS = [
+      {
+        id: "char_1",
+        name: "工具人一號",
+        job: "大劍戰士（大劍）",
+        grisbane: false,
+        grisbaneDiff: "非常困難",
+        succubus: false,
+        abyss: false,
+        board: false,
+        barrier: false,
+        blackhole: false,
+        runes: []
+      },
+      {
+        id: "char_2",
+        name: "工具人二號",
+        job: "長弓兵",
+        grisbane: false,
+        grisbaneDiff: "困難",
+        succubus: false,
+        abyss: false,
+        board: false,
+        barrier: false,
+        blackhole: false,
+        runes: []
+      }
+    ];
+
+    let characters = JSON.parse(localStorage.getItem('mabi_characters')) || DEFAULT_CHARACTERS;
+    let currentView = localStorage.getItem('mabi_view') || 'card';
+
+    function saveData() {
+      localStorage.setItem('mabi_characters', JSON.stringify(characters));
+      render();
+    }
+
+    function updateCountdown() {
+      const now = new Date();
+      const nextMonday = new Date(now);
+      const day = now.getDay();
+      let diffDays = (1 - day + 7) % 7;
+      if (diffDays === 0 && (now.getHours() > 6 || (now.getHours() === 6 && now.getMinutes() > 0))) {
+        diffDays = 7;
+      }
+      nextMonday.setDate(now.getDate() + diffDays);
+      nextMonday.setHours(6, 0, 0, 0);
+
+      const diffMs = nextMonday - now;
+      const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diffMs / (1000 * 60)) % 60);
+      const seconds = Math.floor((diffMs / 1000) % 60);
+
+      document.getElementById('resetCountdown').textContent = 
+        `${days}天 ${String(hours).padStart(2, '0')}時 ${String(minutes).padStart(2, '0')}分 ${String(seconds).padStart(2, '0')}秒`;
+    }
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    function setViewMode(mode) {
+      currentView = mode;
+      localStorage.setItem('mabi_view', mode);
+      const cardContainer = document.getElementById('cardViewContainer');
+      const tableContainer = document.getElementById('tableViewContainer');
+      const cardBtn = document.getElementById('viewCardBtn');
+      const tableBtn = document.getElementById('viewTableBtn');
+
+      if (mode === 'card') {
+        cardContainer.classList.remove('hidden');
+        tableContainer.classList.add('hidden');
+        cardBtn.className = "px-3 py-1.5 rounded-md font-semibold bg-[#286C77] text-white";
+        tableBtn.className = "px-3 py-1.5 rounded-md font-semibold text-[#D6D6D6] hover:text-white";
+      } else {
+        cardContainer.classList.add('hidden');
+        tableContainer.classList.remove('hidden');
+        tableBtn.className = "px-3 py-1.5 rounded-md font-semibold bg-[#286C77] text-white";
+        cardBtn.className = "px-3 py-1.5 rounded-md font-semibold text-[#D6D6D6] hover:text-white";
+      }
+    }
+
+    function toggleTask(charId, field) {
+      const char = characters.find(c => c.id === charId);
+      if (char) {
+        char[field] = !char[field];
+        saveData();
+      }
+    }
+
+    function toggleDifficulty(charId) {
+      const char = characters.find(c => c.id === charId);
+      if (char) {
+        char.grisbaneDiff = char.grisbaneDiff === '困難' ? '非常困難' : '困難';
+        saveData();
+      }
+    }
+
+    function addRune(charId, inputElem) {
+      const val = inputElem.value.trim();
+      if (!val) return;
+      const char = characters.find(c => c.id === charId);
+      if (char) {
+        if (!char.runes) char.runes = [];
+        if (!char.runes.includes(val)) {
+          char.runes.push(val);
+          inputElem.value = '';
+          saveData();
+        }
+      }
+    }
+
+    function removeRune(charId, runeText) {
+      const char = characters.find(c => c.id === charId);
+      if (char && char.runes) {
+        char.runes = char.runes.filter(r => r !== runeText);
+        saveData();
+      }
+    }
+
+    function confirmResetWeek() {
+      if (confirm("確定要重置所有角色的本週副本與任務勾選嗎？（聽牌符文與角色將會保留）")) {
+        characters.forEach(char => {
+          char.grisbane = false;
+          char.succubus = false;
+          char.abyss = false;
+          char.board = false;
+          char.barrier = false;
+          char.blackhole = false;
+        });
+        saveData();
+      }
+    }
+
+    function deleteChar(charId) {
+      if (confirm("確定要刪除此角色嗎？")) {
+        characters = characters.filter(c => c.id !== charId);
+        saveData();
+      }
+    }
+
+    function openModal(id) {
+      document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-user-plus"></i> <span>新增分身角色</span>';
+      document.getElementById('editCharId').value = '';
+      document.getElementById('charNameInput').value = '';
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function saveCharacter() {
+      const name = document.getElementById('charNameInput').value.trim();
+      const job = document.getElementById('charClassSelect').value;
+      const editId = document.getElementById('editCharId').value;
+
+      if (!name) {
+        alert("請輸入角色名稱！");
+        return;
+      }
+
+      if (editId) {
+        const char = characters.find(c => c.id === editId);
+        if (char) {
+          char.name = name;
+          char.job = job;
+        }
+      } else {
+        characters.push({
+          id: 'char_' + Date.now(),
+          name,
+          job,
+          grisbane: false,
+          grisbaneDiff: "非常困難",
+          succubus: false,
+          abyss: false,
+          board: false,
+          barrier: false,
+          blackhole: false,
+          runes: []
+        });
+      }
+      closeModal('addCharModal');
+      saveData();
+    }
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify(characters, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `mabinogi_tracker_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+    }
+
+    function importData(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const imported = JSON.parse(evt.target.result);
+          if (Array.isArray(imported)) {
+            characters = imported;
+            saveData();
+            alert("匯入成功！");
+          }
+        } catch(err) {
+          alert("檔案格式不合！");
+        }
+      }
+      reader.readAsText(file);
+    }
+
+    function render() {
+      let totalTasks = characters.length * 6;
+      let completedTasks = 0;
+
+      const cardContainer = document.getElementById('cardViewContainer');
+      const tableBody = document.getElementById('tableBody');
+      cardContainer.innerHTML = '';
+      tableBody.innerHTML = '';
+
+      characters.forEach(char => {
+        let charDone = 0;
+        ['grisbane', 'succubus', 'abyss', 'board', 'barrier', 'blackhole'].forEach(f => {
+          if (char[f]) { completedTasks++; charDone++; }
+        });
+        const charPct = Math.round((charDone / 6) * 100);
+
+        // 卡片 DOM
+        const card = document.createElement('div');
+        card.className = "bg-[#2c3033] rounded-xl shadow-lg border border-[#707070]/40 overflow-hidden flex flex-col justify-between hover:border-[#286C77] transition";
+        card.innerHTML = `
+          <div>
+            <div class="p-4 bg-[#1f2325] border-b border-[#707070]/30 flex justify-between items-center">
+              <div>
+                <h3 class="font-bold text-xl text-white">${char.name}</h3>
+                <span class="inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded bg-[#286C77]/25 text-[#88d0dc] border border-[#286C77]">
+                  ${char.job}
+                </span>
+              </div>
+              <div class="text-right">
+                <div class="text-base font-bold text-[#88d0dc] font-mono">${charDone}/6 (${charPct}%)</div>
+                <button onclick="deleteChar('${char.id}')" class="text-xs text-[#707070] hover:text-red-400 transition mt-1">
+                  <i class="fa-solid fa-trash-can"></i> 刪除
+                </button>
+              </div>
+            </div>
+
+            <div class="p-4 space-y-3.5">
+              <!-- 格里斯貝恩 -->
+              <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#222527]/70 border border-[#707070]/20 hover:border-[#707070]/50 transition">
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" class="custom-checkbox" ${char.grisbane ? 'checked' : ''} onchange="toggleTask('${char.id}', 'grisbane')">
+                  <span class="font-medium text-[#D6D6D6]">團隊 - 格里斯貝恩</span>
+                </label>
+                <button onclick="toggleDifficulty('${char.id}')" class="text-xs font-bold px-2 py-1 rounded border transition ${char.grisbaneDiff === '非常困難' ? 'bg-red-950/60 text-red-300 border-red-800' : 'bg-amber-950/60 text-amber-300 border-amber-800'}">
+                  ${char.grisbaneDiff}
+                </button>
+              </div>
+
+              <!-- 白魅魔 -->
+              <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#222527]/70 border border-[#707070]/20 hover:border-[#707070]/50 transition">
+                <label class="flex items-center gap-3 cursor-pointer w-full">
+                  <input type="checkbox" class="custom-checkbox" ${char.succubus ? 'checked' : ''} onchange="toggleTask('${char.id}', 'succubus')">
+                  <span class="font-medium text-[#D6D6D6]">團隊 - 白魅魔</span>
+                </label>
+              </div>
+
+              <!-- 深淵副本 -->
+              <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#222527]/70 border border-[#707070]/20 hover:border-[#707070]/50 transition">
+                <label class="flex items-center gap-3 cursor-pointer w-full">
+                  <input type="checkbox" class="custom-checkbox" ${char.abyss ? 'checked' : ''} onchange="toggleTask('${char.id}', 'abyss')">
+                  <span class="font-medium text-[#D6D6D6]">深淵副本</span>
+                </label>
+              </div>
+
+              <!-- 任務布告欄 -->
+              <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#222527]/70 border border-[#707070]/20 hover:border-[#707070]/50 transition">
+                <label class="flex items-center gap-3 cursor-pointer w-full">
+                  <input type="checkbox" class="custom-checkbox" ${char.board ? 'checked' : ''} onchange="toggleTask('${char.id}', 'board')">
+                  <span class="font-medium text-[#D6D6D6]">任務布告欄</span>
+                </label>
+              </div>
+
+              <!-- 結界 -->
+              <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#222527]/70 border border-[#707070]/20 hover:border-[#707070]/50 transition">
+                <label class="flex items-center gap-3 cursor-pointer w-full">
+                  <input type="checkbox" class="custom-checkbox" ${char.barrier ? 'checked' : ''} onchange="toggleTask('${char.id}', 'barrier')">
+                  <span class="font-medium text-[#D6D6D6]">結界打乾淨沒</span>
+                </label>
+              </div>
+
+              <!-- 黑洞 -->
+              <div class="flex items-center justify-between p-2.5 rounded-lg bg-[#222527]/70 border border-[#707070]/20 hover:border-[#707070]/50 transition">
+                <label class="flex items-center gap-3 cursor-pointer w-full">
+                  <input type="checkbox" class="custom-checkbox" ${char.blackhole ? 'checked' : ''} onchange="toggleTask('${char.id}', 'blackhole')">
+                  <span class="font-medium text-[#D6D6D6]">黑洞打乾淨沒</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 聽牌的符文 -->
+          <div class="p-4 bg-[#1f2325] border-t border-[#707070]/30">
+            <span class="block text-xs font-bold text-[#88d0dc] mb-2 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-gem text-[#286C77]"></i> 聽牌的符文
+            </span>
+            <div class="flex flex-wrap gap-1.5 mb-2.5 min-h-[30px]">
+              ${(char.runes && char.runes.length > 0) 
+                ? char.runes.map(r => `
+                    <span class="inline-flex items-center gap-1 text-xs bg-[#286C77]/20 text-[#88d0dc] font-semibold px-2.5 py-1 rounded border border-[#286C77]/50 shadow">
+                      ${r}
+                      <button onclick="removeRune('${char.id}', '${r}')" class="hover:text-red-400 ml-1 text-sm">×</button>
+                    </span>
+                  `).join('') 
+                : '<span class="text-xs text-[#707070] italic">尚未輸入聽牌符文</span>'}
+            </div>
+            <div class="flex gap-2">
+              <input type="text" id="rune_input_${char.id}" placeholder="輸入符文按 Enter..." onkeydown="if(event.key==='Enter') addRune('${char.id}', this)" class="w-full text-xs px-2.5 py-2 border border-[#707070]/50 rounded bg-[#1a1c1d] text-white focus:outline-none focus:border-[#286C77]">
+              <button onclick="addRune('${char.id}', document.getElementById('rune_input_${char.id}'))" class="text-xs bg-[#286C77] text-white px-3 py-2 rounded hover:bg-[#1e535c] whitespace-nowrap font-medium transition">新增</button>
+            </div>
+          </div>
+        `;
+        cardContainer.appendChild(card);
+
+        // 表格 DOM
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-[#34383c]/60 transition";
+        tr.innerHTML = `
+          <td class="py-3 px-4">
+            <div class="font-bold text-white">${char.name}</div>
+            <div class="text-xs text-[#88d0dc] font-semibold">${char.job}</div>
+          </td>
+          <td class="py-3 px-3 text-center">
+            <div class="flex flex-col items-center gap-1">
+              <input type="checkbox" class="custom-checkbox" ${char.grisbane ? 'checked' : ''} onchange="toggleTask('${char.id}', 'grisbane')">
+              <button onclick="toggleDifficulty('${char.id}')" class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${char.grisbaneDiff === '非常困難' ? 'bg-red-950/60 text-red-300 border-red-800' : 'bg-amber-950/60 text-amber-300 border-amber-800'}">
+                ${char.grisbaneDiff}
+              </button>
+            </div>
+          </td>
+          <td class="py-3 px-3 text-center">
+            <input type="checkbox" class="custom-checkbox" ${char.succubus ? 'checked' : ''} onchange="toggleTask('${char.id}', 'succubus')">
+          </td>
+          <td class="py-3 px-3 text-center">
+            <input type="checkbox" class="custom-checkbox" ${char.abyss ? 'checked' : ''} onchange="toggleTask('${char.id}', 'abyss')">
+          </td>
+          <td class="py-3 px-3 text-center">
+            <input type="checkbox" class="custom-checkbox" ${char.board ? 'checked' : ''} onchange="toggleTask('${char.id}', 'board')">
+          </td>
+          <td class="py-3 px-3 text-center">
+            <input type="checkbox" class="custom-checkbox" ${char.barrier ? 'checked' : ''} onchange="toggleTask('${char.id}', 'barrier')">
+          </td>
+          <td class="py-3 px-3 text-center">
+            <input type="checkbox" class="custom-checkbox" ${char.blackhole ? 'checked' : ''} onchange="toggleTask('${char.id}', 'blackhole')">
+          </td>
+          <td class="py-3 px-4">
+            <div class="flex flex-wrap gap-1 mb-1.5">
+              ${(char.runes && char.runes.length > 0)
+                ? char.runes.map(r => `
+                    <span class="inline-flex items-center text-[11px] bg-[#286C77]/20 text-[#88d0dc] px-2 py-0.5 rounded border border-[#286C77]/50">
+                      ${r}
+                      <button onclick="removeRune('${char.id}', '${r}')" class="hover:text-red-400 ml-1">×</button>
+                    </span>
+                  `).join('')
+                : '<span class="text-xs text-[#707070]">無</span>'}
+            </div>
+            <div class="flex gap-1">
+              <input type="text" id="rune_table_input_${char.id}" placeholder="+符文" onkeydown="if(event.key==='Enter') addRune('${char.id}', this)" class="text-xs px-2 py-1 bg-[#1a1c1d] border border-[#707070]/50 text-white rounded w-28 focus:outline-none focus:border-[#286C77]">
+              <button onclick="addRune('${char.id}', document.getElementById('rune_table_input_${char.id}'))" class="text-xs bg-[#286C77] text-white px-2 py-1 rounded">+</button>
+            </div>
+          </td>
+          <td class="py-3 px-3 text-center">
+            <button onclick="deleteChar('${char.id}')" class="text-xs text-red-400 hover:text-red-300 font-medium">刪除</button>
+          </td>
+        `;
+        tableBody.appendChild(tr);
+      });
+
+      const totalPct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+      document.getElementById('overallPercentage').textContent = `${totalPct}% (${completedTasks}/${totalTasks})`;
+      document.getElementById('overallProgressBar').style.width = `${totalPct}%`;
+    }
+
+    setViewMode(currentView);
+    render();
+  </script>
+</body>
+</html>
