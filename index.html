@@ -21,8 +21,8 @@
               teal: '#286C77',
               lightgray: '#D6D6D6',
               gray: '#707070',
-              bgdark: '#222527',      /* 深色護眼背景，告別刺眼白底 */
-              carddark: '#2c3033',    /* 沉穩卡片底色 */
+              bgdark: '#222527',
+              carddark: '#2c3033',
               cardhover: '#34383c'
             }
           }
@@ -37,7 +37,6 @@
       font-size: 1.1rem;
       letter-spacing: 0.02em;
     }
-    /* 自訂大號複選框 */
     .custom-checkbox {
       appearance: none;
       width: 1.7rem;
@@ -66,7 +65,7 @@
     }
   </style>
 </head>
-<body class="min-h-screen pb-20">
+<body class="min-h-screen pb-24">
 
   <!-- 置頂倒數橫幅 (Sticky Top) -->
   <header class="sticky top-0 z-40 bg-[#1b434a] text-white shadow-xl border-b border-[#286C77]">
@@ -104,8 +103,8 @@
     </div>
   </header>
 
-  <!-- 總進度狀態條 -->
   <main class="max-w-7xl mx-auto px-4 mt-6">
+    <!-- 總進度狀態條 -->
     <div class="bg-[#2c3033] rounded-xl p-4 sm:p-5 shadow-lg border border-[#707070]/40 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="w-full sm:w-2/3">
         <div class="flex justify-between items-center mb-2">
@@ -161,6 +160,37 @@
         <tbody id="tableBody" class="divide-y divide-[#707070]/30 text-base"></tbody>
       </table>
     </div>
+
+    <!-- 待辦備忘事項區塊 (新增) -->
+    <section class="mt-10 bg-[#2c3033] rounded-xl p-5 sm:p-6 shadow-lg border border-[#707070]/40">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4 border-b border-[#707070]/30 pb-3">
+        <div class="flex items-center gap-2.5">
+          <i class="fa-solid fa-clipboard-list text-xl text-[#88d0dc]"></i>
+          <h2 class="text-xl font-bold text-white tracking-wide">待辦事項與遊戲備忘</h2>
+          <span id="todoBadge" class="text-xs bg-[#286C77]/30 text-[#88d0dc] border border-[#286C77] px-2 py-0.5 rounded-full font-mono">0 個未完成</span>
+        </div>
+      </div>
+
+      <!-- 輸入框 -->
+      <div class="flex gap-2 sm:gap-3 mb-4">
+        <input 
+          type="text" 
+          id="todoInput" 
+          placeholder="輸入備忘事項（例如：高級羊毛不夠了、週日記得採集...）按 Enter 新增" 
+          onkeydown="if(event.key==='Enter') addTodo()" 
+          class="flex-1 bg-[#1a1c1d] border border-[#707070]/60 text-white rounded-lg px-4 py-2.5 text-base focus:outline-none focus:border-[#286C77] placeholder-[#707070]"
+        >
+        <button 
+          onclick="addTodo()" 
+          class="bg-[#286C77] hover:bg-[#1e535c] text-white font-bold px-5 py-2.5 rounded-lg shadow transition flex items-center gap-2 text-base whitespace-nowrap"
+        >
+          <i class="fa-solid fa-plus"></i> 新增
+        </button>
+      </div>
+
+      <!-- 待辦清單列表 -->
+      <ul id="todoList" class="space-y-2.5"></ul>
+    </section>
   </main>
 
   <!-- 新增/編輯角色彈窗 -->
@@ -252,12 +282,22 @@
       }
     ];
 
+    const DEFAULT_TODOS = [
+      { id: "todo_1", text: "高級羊毛不夠了", done: false }
+    ];
+
     let characters = JSON.parse(localStorage.getItem('mabi_characters')) || DEFAULT_CHARACTERS;
+    let todos = JSON.parse(localStorage.getItem('mabi_todos')) || DEFAULT_TODOS;
     let currentView = localStorage.getItem('mabi_view') || 'card';
 
     function saveData() {
       localStorage.setItem('mabi_characters', JSON.stringify(characters));
       render();
+    }
+
+    function saveTodos() {
+      localStorage.setItem('mabi_todos', JSON.stringify(todos));
+      renderTodos();
     }
 
     function updateCountdown() {
@@ -343,7 +383,7 @@
     }
 
     function confirmResetWeek() {
-      if (confirm("確定要重置所有角色的本週副本與任務勾選嗎？（聽牌符文與角色將會保留）")) {
+      if (confirm("確定要重置所有角色的本週副本與任務勾選嗎？（聽牌符文、角色與待辦事項將會保留）")) {
         characters.forEach(char => {
           char.grisbane = false;
           char.succubus = false;
@@ -409,8 +449,69 @@
       saveData();
     }
 
+    // 待辦事項邏輯
+    function addTodo() {
+      const input = document.getElementById('todoInput');
+      const text = input.value.trim();
+      if (!text) return;
+      todos.push({
+        id: 'todo_' + Date.now(),
+        text: text,
+        done: false
+      });
+      input.value = '';
+      saveTodos();
+    }
+
+    function toggleTodo(todoId) {
+      const item = todos.find(t => t.id === todoId);
+      if (item) {
+        item.done = !item.done;
+        saveTodos();
+      }
+    }
+
+    function deleteTodo(todoId) {
+      todos = todos.filter(t => t.id !== todoId);
+      saveTodos();
+    }
+
+    function renderTodos() {
+      const list = document.getElementById('todoList');
+      list.innerHTML = '';
+
+      const pendingCount = todos.filter(t => !t.done).length;
+      document.getElementById('todoBadge').textContent = `${pendingCount} 個未完成`;
+
+      if (todos.length === 0) {
+        list.innerHTML = `<li class="text-[#707070] italic text-sm py-2">目前沒有待辦事項，隨手記下一條吧！</li>`;
+        return;
+      }
+
+      todos.forEach(item => {
+        const li = document.createElement('li');
+        li.className = "flex items-center justify-between p-3 rounded-lg bg-[#222527]/70 border border-[#707070]/20 hover:border-[#707070]/50 transition group";
+        li.innerHTML = `
+          <label class="flex items-center gap-3 cursor-pointer flex-1 select-none">
+            <input type="checkbox" class="custom-checkbox" ${item.done ? 'checked' : ''} onchange="toggleTodo('${item.id}')">
+            <span class="text-base transition ${item.done ? 'line-through text-[#707070]' : 'text-gray-100'}">${item.text}</span>
+          </label>
+          <button onclick="deleteTodo('${item.id}')" class="text-sm text-[#707070] hover:text-red-400 px-2 py-1 transition opacity-80 group-hover:opacity-100" title="刪除事項">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    // 匯出包含角色與待辦事項
     function exportData() {
-      const blob = new Blob([JSON.stringify(characters, null, 2)], { type: 'application/json' });
+      const exportPayload = {
+        characters: characters,
+        todos: todos,
+        exportDate: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -427,9 +528,13 @@
           const imported = JSON.parse(evt.target.result);
           if (Array.isArray(imported)) {
             characters = imported;
-            saveData();
-            alert("匯入成功！");
+          } else if (imported.characters) {
+            characters = imported.characters || [];
+            todos = imported.todos || [];
           }
+          saveData();
+          saveTodos();
+          alert("匯入成功！");
         } catch(err) {
           alert("檔案格式不合！");
         }
@@ -611,6 +716,7 @@
 
     setViewMode(currentView);
     render();
+    renderTodos();
   </script>
 </body>
 </html>
