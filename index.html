@@ -6,7 +6,7 @@
   <title>瑪奇 Mobile - 多分身週常進度管理</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Firebase SDK (Compat 版本，方便單檔案載入) -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
   <script>
@@ -321,29 +321,50 @@
     </div>
   </div>
 
-  <!-- Firebase 雲端同步設定彈窗 -->
+  <!-- 多人雲端同步與專屬代號設定彈窗 -->
   <div id="firebaseModal" class="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-[#2c3033] rounded-lg max-w-md w-full p-5 shadow-xl border border-[#707070]">
       <h2 class="text-base font-bold text-[#88d0dc] mb-2 flex items-center gap-1.5">
-        <i class="fa-solid fa-cloud"></i> <span>Firebase 跨裝置即時同步設定</span>
+        <i class="fa-solid fa-users-gear"></i> <span>多人雲端同步 & 專屬代號設定</span>
       </h2>
-      <p class="text-xs text-[#D6D6D6]/80 mb-3">
-        填入你申請的 Firebase Realtime Database 資訊後，電腦與手機將自動雙向即時同步。
+      <p class="text-xs text-[#D6D6D6]/80 mb-3 leading-relaxed">
+        每個人只要輸入自己的<strong>「專屬代號」</strong>，就會擁有獨立的角色清單與待辦事項，再多人用也不會互相干擾！
       </p>
 
-      <div class="space-y-3">
-        <div>
-          <label class="block text-xs font-medium text-[#D6D6D6] mb-1">Database URL (必填)</label>
-          <input type="text" id="fbDbUrlInput" placeholder="https://你的專案-default-rtdb.firebaseio.com/" class="w-full bg-[#1a1c1d] border border-[#707070] text-white rounded px-3 py-1.5 text-xs focus:outline-none focus:border-[#286C77]">
+      <div class="space-y-3.5">
+        <!-- 專屬代號 -->
+        <div class="p-3 rounded bg-[#1f2325] border border-[#286C77]">
+          <label class="block text-xs font-bold text-[#88d0dc] mb-1">
+            <i class="fa-solid fa-id-badge mr-1"></i> 你的專屬代號 / 暱稱 (必填，區分不同人)
+          </label>
+          <input type="text" id="fbProfileInput" placeholder="例如：阿程、老婆、玩家A..." class="w-full bg-[#1a1c1d] border border-[#707070] text-white rounded px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#88d0dc]">
+          <p class="text-[11px] text-[#D6D6D6]/60 mt-1">※ 在手機與電腦輸入相同代號即可同步；不同人請填不同代號。</p>
+          
+          <!-- 常用代號快速切換列 -->
+          <div id="recentProfilesContainer" class="mt-2.5 pt-2 border-t border-[#707070]/30 hidden">
+            <span class="block text-[11px] text-[#D6D6D6]/70 mb-1">曾用過的代號（點擊快速切換）：</span>
+            <div id="recentProfilesList" class="flex flex-wrap gap-1.5"></div>
+          </div>
         </div>
-        <div>
-          <label class="block text-xs font-medium text-[#D6D6D6] mb-1">API Key (選填，公開測試規則下可不填)</label>
-          <input type="text" id="fbApiKeyInput" placeholder="AIzaSy..." class="w-full bg-[#1a1c1d] border border-[#707070] text-white rounded px-3 py-1.5 text-xs focus:outline-none focus:border-[#286C77]">
-        </div>
+
+        <!-- 進階資料庫設定 (預設已填好) -->
+        <details class="text-xs bg-[#222527] rounded p-2.5 border border-[#707070]/40">
+          <summary class="cursor-pointer text-[#D6D6D6] font-medium select-none">進階：Firebase 資料庫網址 (預設已內建，免改)</summary>
+          <div class="space-y-2.5 mt-2.5 pt-2 border-t border-[#707070]/30">
+            <div>
+              <label class="block text-[11px] text-[#D6D6D6] mb-1">Database URL</label>
+              <input type="text" id="fbDbUrlInput" class="w-full bg-[#1a1c1d] border border-[#707070] text-white rounded px-2.5 py-1 text-xs focus:outline-none focus:border-[#286C77]">
+            </div>
+            <div>
+              <label class="block text-[11px] text-[#D6D6D6] mb-1">API Key (選填)</label>
+              <input type="text" id="fbApiKeyInput" placeholder="留白即可" class="w-full bg-[#1a1c1d] border border-[#707070] text-white rounded px-2.5 py-1 text-xs focus:outline-none focus:border-[#286C77]">
+            </div>
+          </div>
+        </details>
       </div>
 
       <div class="mt-4 flex justify-between items-center">
-        <button onclick="disconnectFirebase()" class="px-2.5 py-1.5 text-red-400 hover:bg-red-950/40 text-xs rounded transition">清除連線</button>
+        <button onclick="disconnectFirebase()" class="px-2.5 py-1.5 text-red-400 hover:bg-red-950/40 text-xs rounded transition">切換回單機模式</button>
         <div class="flex gap-2">
           <button onclick="closeModal('firebaseModal')" class="px-3 py-1.5 text-[#D6D6D6] text-xs hover:bg-[#34383c] rounded transition">關閉</button>
           <button onclick="saveFirebaseConfig()" class="px-4 py-1.5 bg-[#286C77] hover:bg-[#1e535c] text-white font-medium text-xs rounded shadow transition">儲存並連線</button>
@@ -353,74 +374,99 @@
   </div>
 
   <script>
+    const DEFAULT_DB_URL = "https://mm-tracker-120ff-default-rtdb.asia-southeast1.firebasedatabase.app";
     const TASK_FIELDS = ['grisbane', 'succubus', 'abyss', 'board', 'barrier', 'blackhole', 'cooking'];
 
-    const DEFAULT_CHARACTERS = [
-      {
-        id: "char_1",
-        name: "工具人一號",
-        job: "大劍戰士（大劍）",
-        grisbane: false,
-        grisbaneDiff: "非常困難",
-        succubus: false,
-        abyss: false,
-        board: false,
-        barrier: false,
-        blackhole: false,
-        cooking: false,
-        runes: []
-      },
-      {
-        id: "char_2",
-        name: "工具人二號",
-        job: "長弓兵",
-        grisbane: false,
-        grisbaneDiff: "困難",
-        succubus: false,
-        abyss: false,
-        board: false,
-        barrier: false,
-        blackhole: false,
-        cooking: false,
-        runes: []
-      }
-    ];
+    function getDefaultCharacters() {
+      return [
+        {
+          id: "char_1",
+          name: "工具人一號",
+          job: "大劍戰士（大劍）",
+          grisbane: false,
+          grisbaneDiff: "非常困難",
+          succubus: false,
+          abyss: false,
+          board: false,
+          barrier: false,
+          blackhole: false,
+          cooking: false,
+          runes: []
+        },
+        {
+          id: "char_2",
+          name: "工具人二號",
+          job: "長弓兵",
+          grisbane: false,
+          grisbaneDiff: "困難",
+          succubus: false,
+          abyss: false,
+          board: false,
+          barrier: false,
+          blackhole: false,
+          cooking: false,
+          runes: []
+        }
+      ];
+    }
 
-    const DEFAULT_TODOS = [
-      { id: "todo_1", text: "高級羊毛不夠了", done: false }
-    ];
+    function getDefaultTodos() {
+      return [
+        { id: "todo_1", text: "高級羊毛不夠了", done: false }
+      ];
+    }
 
-    let characters = JSON.parse(localStorage.getItem('mabi_characters')) || DEFAULT_CHARACTERS;
-    // 確保舊資料升級時自動補齊 cooking 欄位
+    let characters = JSON.parse(localStorage.getItem('mabi_characters')) || getDefaultCharacters();
     characters.forEach(c => { if (typeof c.cooking === 'undefined') c.cooking = false; });
 
-    let todos = JSON.parse(localStorage.getItem('mabi_todos')) || DEFAULT_TODOS;
+    let todos = JSON.parse(localStorage.getItem('mabi_todos')) || getDefaultTodos();
     let currentView = localStorage.getItem('mabi_view') || 'card';
 
     // Firebase 狀態變數
     let dbRef = null;
     let isRemoteUpdating = false;
+    let currentProfile = "";
+
+    // 清理代號中的非法字元 (Firebase 路徑不可含 . # $ [ ] /)
+    function sanitizeProfileKey(str) {
+      return str.trim().replace(/[.#$\[\]\/]/g, '_');
+    }
 
     function initFirebase() {
       const savedConfig = JSON.parse(localStorage.getItem('mabi_fb_config') || 'null');
-      if (!savedConfig || !savedConfig.databaseURL) {
+      const dbUrl = (savedConfig && savedConfig.databaseURL) ? savedConfig.databaseURL : DEFAULT_DB_URL;
+      const apiKey = (savedConfig && savedConfig.apiKey) ? savedConfig.apiKey : "";
+      const profileId = (savedConfig && savedConfig.profileId) ? savedConfig.profileId : "";
+
+      document.getElementById('fbDbUrlInput').value = dbUrl;
+      document.getElementById('fbApiKeyInput').value = apiKey;
+      document.getElementById('fbProfileInput').value = profileId;
+
+      renderRecentProfiles();
+
+      // 若尚未設定專屬代號，維持單機模式，等待使用者填寫代號
+      if (!savedConfig || !savedConfig.databaseURL || !profileId) {
         updateCloudUI(false);
         return;
       }
 
-      document.getElementById('fbDbUrlInput').value = savedConfig.databaseURL || '';
-      document.getElementById('fbApiKeyInput').value = savedConfig.apiKey || '';
+      currentProfile = profileId;
+      const safeKey = sanitizeProfileKey(profileId);
 
       try {
         if (!firebase.apps.length) {
           firebase.initializeApp({
-            apiKey: savedConfig.apiKey || "demo-key",
-            databaseURL: savedConfig.databaseURL
+            apiKey: apiKey || "demo-key",
+            databaseURL: dbUrl
           });
         }
-        dbRef = firebase.database().ref('mabi_tracker_data');
 
-        // 監聽雲端即時變更
+        if (dbRef) dbRef.off();
+
+        // 若代號為 default，為了相容你第一版的舊路徑，直接讀寫 mabi_tracker_data 根目錄；否則讀寫各自獨立的 mabi_tracker_users/{代號}
+        const dbPath = (safeKey === 'default') ? 'mabi_tracker_data' : `mabi_tracker_users/${safeKey}`;
+        dbRef = firebase.database().ref(dbPath);
+
         dbRef.on('value', (snapshot) => {
           const val = snapshot.val();
           if (val) {
@@ -431,23 +477,37 @@
                 cooking: typeof c.cooking !== 'undefined' ? c.cooking : false,
                 runes: c.runes || []
               }));
-              localStorage.setItem('mabi_characters', JSON.stringify(characters));
+            } else {
+              characters = [];
             }
+            localStorage.setItem('mabi_characters', JSON.stringify(characters));
+
             if (val.todos) {
               todos = val.todos;
-              localStorage.setItem('mabi_todos', JSON.stringify(todos));
-            } else if (val.characters && !val.todos) {
+            } else {
               todos = [];
-              localStorage.setItem('mabi_todos', JSON.stringify(todos));
             }
+            localStorage.setItem('mabi_todos', JSON.stringify(todos));
+
             render();
             renderTodos();
             isRemoteUpdating = false;
           } else {
-            // 若雲端還是空的，將本地資料推上去初始化
+            // 雲端此代號還是全新空白的：
+            // 若是剛剛切換到一個新代號，給予乾淨預設值並推上雲端，避免把前一個人的本地資料蓋過去
+            if (localStorage.getItem('mabi_just_switched') === 'true') {
+              characters = getDefaultCharacters();
+              todos = getDefaultTodos();
+              localStorage.setItem('mabi_characters', JSON.stringify(characters));
+              localStorage.setItem('mabi_todos', JSON.stringify(todos));
+              render();
+              renderTodos();
+            }
+            localStorage.removeItem('mabi_just_switched');
             syncToCloud();
           }
-          updateCloudUI(true);
+          localStorage.removeItem('mabi_just_switched');
+          updateCloudUI(true, currentProfile);
         }, (err) => {
           console.error("Firebase 讀取失敗:", err);
           updateCloudUI(false, "連線錯誤");
@@ -458,15 +518,15 @@
       }
     }
 
-    function updateCloudUI(connected, errorMsg) {
+    function updateCloudUI(connected, labelText) {
       const icon = document.getElementById('cloudIcon');
       const text = document.getElementById('cloudText');
       if (connected) {
         icon.className = "fa-solid fa-cloud text-emerald-400";
-        text.textContent = "雲端即時同步中";
+        text.textContent = `雲端：${labelText}`;
       } else {
         icon.className = "fa-solid fa-cloud text-gray-400";
-        text.textContent = errorMsg || "雲端未連線";
+        text.textContent = labelText || "點此設定雲端代號";
       }
     }
 
@@ -480,20 +540,56 @@
       }
     }
 
-    function saveFirebaseConfig() {
-      const databaseURL = document.getElementById('fbDbUrlInput').value.trim();
-      const apiKey = document.getElementById('fbApiKeyInput').value.trim();
-      if (!databaseURL) {
-        alert("請填入 Database URL！");
+    function renderRecentProfiles() {
+      const recent = JSON.parse(localStorage.getItem('mabi_recent_profiles') || '[]');
+      const container = document.getElementById('recentProfilesContainer');
+      const list = document.getElementById('recentProfilesList');
+      if (recent.length === 0) {
+        container.classList.add('hidden');
         return;
       }
-      localStorage.setItem('mabi_fb_config', JSON.stringify({ databaseURL, apiKey }));
+      container.classList.remove('hidden');
+      list.innerHTML = recent.map(p => `
+        <button onclick="quickSwitchProfile('${p}')" class="text-xs px-2.5 py-1 rounded border transition ${p === currentProfile ? 'bg-[#286C77] text-white border-[#88d0dc] font-bold' : 'bg-[#1a1c1d] text-[#D6D6D6] border-[#707070]/50 hover:border-[#88d0dc]'}">
+          ${p}
+        </button>
+      `).join('');
+    }
+
+    function quickSwitchProfile(profileName) {
+      document.getElementById('fbProfileInput').value = profileName;
+      saveFirebaseConfig();
+    }
+
+    function saveFirebaseConfig() {
+      const databaseURL = document.getElementById('fbDbUrlInput').value.trim() || DEFAULT_DB_URL;
+      const apiKey = document.getElementById('fbApiKeyInput').value.trim();
+      const profileId = document.getElementById('fbProfileInput').value.trim();
+
+      if (!profileId) {
+        alert("請輸入你的「專屬代號 / 暱稱」（例如你的名字）！");
+        return;
+      }
+
+      const oldConfig = JSON.parse(localStorage.getItem('mabi_fb_config') || 'null');
+      if (oldConfig && oldConfig.profileId && oldConfig.profileId !== profileId) {
+        localStorage.setItem('mabi_just_switched', 'true');
+      }
+
+      // 儲存常用代號紀錄
+      let recent = JSON.parse(localStorage.getItem('mabi_recent_profiles') || '[]');
+      if (!recent.includes(profileId)) {
+        recent.push(profileId);
+        localStorage.setItem('mabi_recent_profiles', JSON.stringify(recent));
+      }
+
+      localStorage.setItem('mabi_fb_config', JSON.stringify({ databaseURL, apiKey, profileId }));
       closeModal('firebaseModal');
       location.reload();
     }
 
     function disconnectFirebase() {
-      if (confirm("確定要中斷雲端同步嗎？（本地資料仍會保留）")) {
+      if (confirm("確定要切換回單機模式嗎？（本地資料仍會保留）")) {
         localStorage.removeItem('mabi_fb_config');
         location.reload();
       }
@@ -615,6 +711,9 @@
         document.getElementById('editCharId').value = '';
         document.getElementById('charNameInput').value = '';
       }
+      if (id === 'firebaseModal') {
+        renderRecentProfiles();
+      }
       document.getElementById(id).classList.remove('hidden');
     }
 
@@ -714,6 +813,7 @@
 
     function exportData() {
       const exportPayload = {
+        profile: currentProfile || 'local',
         characters: characters,
         todos: todos,
         exportDate: new Date().toISOString()
@@ -722,7 +822,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `mabinogi_tracker_${new Date().toISOString().slice(0,10)}.json`;
+      a.download = `mabinogi_tracker_${currentProfile || 'backup'}_${new Date().toISOString().slice(0,10)}.json`;
       a.click();
     }
 
@@ -750,7 +850,7 @@
     }
 
     function render() {
-      const totalTasksPerChar = TASK_FIELDS.length; // 7 項
+      const totalTasksPerChar = TASK_FIELDS.length;
       let totalTasks = characters.length * totalTasksPerChar;
       let completedTasks = 0;
 
