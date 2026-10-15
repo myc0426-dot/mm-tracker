@@ -14,17 +14,15 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              DEFAULT: '#286C77',
-              hover: '#1e535c',
-              light: '#3d8692'
-            },
-            palette: {
-              teal: '#286C77',
-              lightgray: '#D6D6D6',
-              gray: '#707070',
-              bgdark: '#222527',
-              carddark: '#2c3033'
+            tavern: {
+              bg: '#161920',        /* 深石板背景 */
+              card: '#1E222B',      /* 卡片底色 */
+              cardlight: '#262B36', /* 區塊次底色 */
+              border: '#323846',    /* 柔和邊框 */
+              amber: '#E5A93C',     /* 營火琥珀金 (主強調色) */
+              amberhover: '#D09222',
+              sage: '#38A169',      /* 翠綠完成色 */
+              muted: '#8E96A8'      /* 次要文字 */
             }
           }
         }
@@ -33,29 +31,31 @@
   </script>
   <style>
     body {
-      background-color: #222527;
-      color: #e5e7eb;
+      background-color: #161920;
+      color: #EAECEF;
       font-size: 0.95rem;
       line-height: 1.5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft JhengHei", sans-serif;
     }
     .custom-checkbox {
       appearance: none;
       width: 1.25rem;
       height: 1.25rem;
-      border: 1.5px solid #707070;
-      border-radius: 0.25rem;
+      border: 1.5px solid #4A5265;
+      border-radius: 0.3rem;
       display: inline-grid;
       place-content: center;
       cursor: pointer;
-      background-color: #1a1c1d;
+      background-color: #12151A;
       transition: all 0.15s ease-in-out;
+      flex-shrink: 0;
     }
     .custom-checkbox:hover {
-      border-color: #286C77;
+      border-color: #E5A93C;
     }
     .custom-checkbox:checked {
-      background-color: #286C77;
-      border-color: #3d8692;
+      background-color: #38A169;
+      border-color: #48BB78;
     }
     .custom-checkbox:checked::before {
       content: "\f00c";
@@ -69,38 +69,40 @@
 <body class="min-h-screen pb-20">
 
   <!-- 置頂倒數橫幅 -->
-  <header class="sticky top-0 z-40 bg-[#1b434a] text-white shadow-md border-b border-[#286C77]">
+  <header class="sticky top-0 z-40 bg-[#1B1F28]/95 backdrop-blur-md text-white shadow-lg border-b border-[#323846]">
     <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-2.5">
       <div class="flex items-center gap-2.5">
-        <i class="fa-solid fa-shield-halved text-xl text-[#88d0dc]"></i>
+        <div class="w-8 h-8 rounded-lg bg-[#E5A93C]/15 border border-[#E5A93C]/40 flex items-center justify-center text-[#E5A93C]">
+          <i class="fa-solid fa-fire-flame-curved text-lg"></i>
+        </div>
         <div>
-          <h1 class="text-base sm:text-lg font-bold tracking-wide">瑪奇 Mobile 多分身進度追蹤</h1>
-          <p class="text-[11px] text-[#D6D6D6]/80 leading-tight">每週一 06:00:00 重置</p>
+          <h1 class="text-base sm:text-lg font-bold tracking-wide text-gray-100">瑪奇 Mobile 冒險進度筆記</h1>
+          <p class="text-[11px] text-[#8E96A8] leading-tight">每週一 06:00:00 重置</p>
         </div>
       </div>
 
       <!-- 倒數計時 -->
-      <div class="flex items-center gap-2.5 bg-[#132c31] px-3 py-1.5 rounded border border-[#286C77]/60">
-        <div class="text-xs text-[#D6D6D6] flex items-center gap-1.5">
-          <i class="fa-regular fa-clock animate-pulse text-[#88d0dc]"></i>
+      <div class="flex items-center gap-2.5 bg-[#12151A] px-3.5 py-1.5 rounded-lg border border-[#323846]">
+        <div class="text-xs text-[#8E96A8] flex items-center gap-1.5">
+          <i class="fa-regular fa-clock animate-pulse text-[#E5A93C]"></i>
           <span>距離週重置：</span>
         </div>
-        <div id="resetCountdown" class="font-mono text-sm sm:text-base font-bold text-amber-300">
+        <div id="resetCountdown" class="font-mono text-sm sm:text-base font-bold text-[#E5A93C]">
           計算中...
         </div>
       </div>
 
       <!-- 操作按鈕 -->
       <div class="flex items-center gap-2">
-        <button onclick="openModal('firebaseModal')" id="cloudStatusBtn" class="bg-[#132c31] hover:bg-[#1e535c] text-[#D6D6D6] text-xs px-2.5 py-1.5 rounded border border-[#707070]/60 transition flex items-center gap-1.5">
-          <i id="cloudIcon" class="fa-solid fa-cloud text-gray-400"></i>
+        <button onclick="openModal('firebaseModal')" id="cloudStatusBtn" class="bg-[#12151A] hover:bg-[#262B36] text-gray-300 text-xs px-3 py-1.5 rounded-lg border border-[#323846] transition flex items-center gap-1.5">
+          <i id="cloudIcon" class="fa-solid fa-cloud text-gray-500"></i>
           <span id="cloudText">雲端未連線</span>
         </button>
-        <button onclick="confirmResetWeek()" class="bg-[#286C77] hover:bg-[#1e535c] text-white text-xs px-2.5 py-1.5 rounded border border-[#3d8692] transition flex items-center gap-1">
-          <i class="fa-solid fa-arrows-rotate"></i>
+        <button onclick="confirmResetWeek()" class="bg-[#262B36] hover:bg-[#323846] text-gray-200 text-xs px-3 py-1.5 rounded-lg border border-[#4A5265]/50 transition flex items-center gap-1">
+          <i class="fa-solid fa-arrows-rotate text-[#E5A93C]"></i>
           <span>重置本週</span>
         </button>
-        <button onclick="openModal('addCharModal')" class="bg-[#D6D6D6] hover:bg-white text-[#1b434a] font-bold text-xs px-3 py-1.5 rounded shadow transition flex items-center gap-1">
+        <button onclick="openModal('addCharModal')" class="bg-[#E5A93C] hover:bg-[#D09222] text-[#161920] font-bold text-xs px-3.5 py-1.5 rounded-lg shadow transition flex items-center gap-1">
           <i class="fa-solid fa-user-plus"></i>
           <span>新增角色</span>
         </button>
@@ -110,33 +112,33 @@
 
   <main class="max-w-7xl mx-auto px-4 mt-5">
     <!-- 總進度條 -->
-    <div class="bg-[#2c3033] rounded-lg p-3.5 sm:p-4 shadow border border-[#707070]/40 mb-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+    <div class="bg-[#1E222B] rounded-xl p-3.5 sm:p-4 shadow border border-[#323846] mb-5 flex flex-col sm:flex-row items-center justify-between gap-3">
       <div class="w-full sm:w-2/3">
         <div class="flex justify-between items-center mb-1.5">
-          <span class="font-medium text-[#D6D6D6] text-sm flex items-center gap-1.5">
-            <i class="fa-solid fa-list-check text-[#88d0dc]"></i> 全分身本週完成率 (7項週常)
+          <span class="font-medium text-gray-300 text-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-compass text-[#E5A93C]"></i> 全分身本週完成率 (4項核心週常)
           </span>
-          <span id="overallPercentage" class="font-bold text-[#88d0dc] text-sm font-mono">0%</span>
+          <span id="overallPercentage" class="font-bold text-[#E5A93C] text-sm font-mono">0%</span>
         </div>
-        <div class="w-full bg-[#1a1c1d] rounded-full h-2.5 overflow-hidden border border-[#707070]/30">
-          <div id="overallProgressBar" class="bg-[#286C77] h-full transition-all duration-300 rounded-full" style="width: 0%"></div>
+        <div class="w-full bg-[#12151A] rounded-full h-2.5 overflow-hidden border border-[#323846]">
+          <div id="overallProgressBar" class="bg-gradient-to-r from-[#E5A93C] to-[#38A169] h-full transition-all duration-300 rounded-full" style="width: 0%"></div>
         </div>
       </div>
 
       <!-- 檢視切換與備份 -->
       <div class="flex items-center gap-2 self-end sm:self-center">
-        <div class="inline-flex rounded border border-[#707070]/60 p-0.5 bg-[#1a1c1d] text-xs">
-          <button id="viewCardBtn" onclick="setViewMode('card')" class="px-2.5 py-1 rounded font-medium bg-[#286C77] text-white">
+        <div class="inline-flex rounded-lg border border-[#323846] p-0.5 bg-[#12151A] text-xs">
+          <button id="viewCardBtn" onclick="setViewMode('card')" class="px-2.5 py-1 rounded-md font-medium bg-[#E5A93C] text-[#161920]">
             <i class="fa-solid fa-grip mr-1"></i> 卡片
           </button>
-          <button id="viewTableBtn" onclick="setViewMode('table')" class="px-2.5 py-1 rounded font-medium text-[#D6D6D6] hover:text-white">
+          <button id="viewTableBtn" onclick="setViewMode('table')" class="px-2.5 py-1 rounded-md font-medium text-[#8E96A8] hover:text-white">
             <i class="fa-solid fa-table-list mr-1"></i> 矩陣
           </button>
         </div>
-        <button onclick="exportData()" title="匯出備份 JSON" class="p-1.5 border border-[#707070]/60 rounded text-[#D6D6D6] hover:bg-[#34383c] text-xs">
+        <button onclick="exportData()" title="匯出備份 JSON" class="p-1.5 border border-[#323846] rounded-lg text-[#8E96A8] hover:text-white hover:bg-[#262B36] text-xs transition">
           <i class="fa-solid fa-file-export"></i>
         </button>
-        <button onclick="document.getElementById('importFile').click()" title="匯入備份 JSON" class="p-1.5 border border-[#707070]/60 rounded text-[#D6D6D6] hover:bg-[#34383c] text-xs">
+        <button onclick="document.getElementById('importFile').click()" title="匯入備份 JSON" class="p-1.5 border border-[#323846] rounded-lg text-[#8E96A8] hover:text-white hover:bg-[#262B36] text-xs transition">
           <i class="fa-solid fa-file-import"></i>
         </button>
         <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
@@ -147,23 +149,20 @@
     <div id="cardViewContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 
     <!-- 矩陣表格檢視 -->
-    <div id="tableViewContainer" class="hidden bg-[#2c3033] rounded-lg shadow border border-[#707070]/40 overflow-x-auto">
-      <table class="w-full text-left border-collapse min-w-[920px]">
+    <div id="tableViewContainer" class="hidden bg-[#1E222B] rounded-xl shadow border border-[#323846] overflow-x-auto">
+      <table class="w-full text-left border-collapse min-w-[780px]">
         <thead>
-          <tr class="bg-[#1b434a] text-white text-xs border-b border-[#286C77]">
-            <th class="py-2.5 px-3 font-semibold w-36">角色名稱 / 職業</th>
-            <th class="py-2.5 px-2 font-semibold text-center">格里斯貝恩</th>
-            <th class="py-2.5 px-2 font-semibold text-center">白魅魔</th>
-            <th class="py-2.5 px-2 font-semibold text-center">深淵副本</th>
-            <th class="py-2.5 px-2 font-semibold text-center">布告欄</th>
-            <th class="py-2.5 px-2 font-semibold text-center">結界</th>
-            <th class="py-2.5 px-2 font-semibold text-center">黑洞</th>
-            <th class="py-2.5 px-2 font-semibold text-center">每週料理材料</th>
-            <th class="py-2.5 px-3 font-semibold min-w-[190px]">聽牌的符文</th>
-            <th class="py-2.5 px-2 font-semibold text-center w-14">操作</th>
+          <tr class="bg-[#262B36] text-gray-200 text-xs border-b border-[#323846]">
+            <th class="py-3 px-4 font-semibold w-40">角色名稱 / 職業</th>
+            <th class="py-3 px-2 font-semibold text-center">格里斯貝恩</th>
+            <th class="py-3 px-2 font-semibold text-center">白魅魔</th>
+            <th class="py-3 px-2 font-semibold text-center">深淵副本</th>
+            <th class="py-3 px-2 font-semibold text-center">布告欄 & 料理材料</th>
+            <th class="py-3 px-3 font-semibold min-w-[200px]">聽牌的符文</th>
+            <th class="py-3 px-2 font-semibold text-center w-16">操作</th>
           </tr>
         </thead>
-        <tbody id="tableBody" class="divide-y divide-[#707070]/30 text-xs"></tbody>
+        <tbody id="tableBody" class="divide-y divide-[#323846]/60 text-xs"></tbody>
       </table>
     </div>
 
@@ -171,70 +170,34 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-8">
       
       <!-- 常用料理配方速查 (佔 5 欄) -->
-      <section class="lg:col-span-5 bg-[#2c3033] rounded-lg p-4 sm:p-5 shadow border border-[#707070]/40 flex flex-col justify-between">
+      <section class="lg:col-span-5 bg-[#1E222B] rounded-xl p-4 sm:p-5 shadow border border-[#323846] flex flex-col justify-between">
         <div>
-          <div class="flex items-center justify-between gap-2 mb-3 border-b border-[#707070]/30 pb-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3.5 border-b border-[#323846] pb-2.5">
             <div class="flex items-center gap-2">
-              <i class="fa-solid fa-utensils text-base text-[#88d0dc]"></i>
+              <i class="fa-solid fa-utensils text-base text-[#E5A93C]"></i>
               <h2 class="text-base font-bold text-white">常用料理配方速查</h2>
             </div>
-            <span class="text-[11px] text-[#D6D6D6]/70">免開遊戲快速對照</span>
-          </div>
 
-          <div class="space-y-3">
-            <!-- 沙威瑪 -->
-            <div class="p-3 rounded bg-[#222527]/80 border border-[#707070]/25 hover:border-[#286C77] transition">
-              <div class="flex items-center justify-between mb-1">
-                <span class="font-bold text-sm text-[#88d0dc]">🥙 沙威瑪</span>
-                <span class="text-[11px] bg-[#286C77]/30 text-[#D6D6D6] px-2 py-0.5 rounded border border-[#286C77]/50">力量 & 幸運｜台Lv.4 / 料Lv.13</span>
-              </div>
-              <div class="flex flex-wrap gap-1.5 mt-2">
-                <span class="text-xs bg-[#1a1c1d] text-gray-200 px-2 py-0.5 rounded border border-[#707070]/40">清淡的肉 <strong class="text-amber-300">×10</strong></span>
-                <span class="text-xs bg-[#1a1c1d] text-gray-200 px-2 py-0.5 rounded border border-[#707070]/40">黃豆 <strong class="text-amber-300">×12</strong></span>
-                <span class="text-xs bg-[#1a1c1d] text-gray-200 px-2 py-0.5 rounded border border-[#707070]/40">麵粉 <strong class="text-amber-300">×3</strong></span>
-                <span class="text-xs bg-[#1a1c1d] text-gray-200 px-2 py-0.5 rounded border border-[#707070]/40">高麗菜 <strong class="text-amber-300">×5</strong></span>
-                <span class="text-xs bg-[#1a1c1d] text-gray-200 px-2 py-0.5 rounded border border-[#707070]/40">檸檬 <strong class="text-amber-300">×2</strong></span>
-              </div>
-            </div>
-
-            <!-- 蘋果鮮奶油蛋糕 -->
-            <div class="p-3 rounded bg-[#222527]/80 border border-[#707070]/25 hover:border-[#286C77] transition">
-              <div class="flex items-center justify-between mb-1">
-                <span class="font-bold text-sm text-[#88d0dc]">🍰 蘋果鮮奶油蛋糕</span>
-                <span class="text-[11px] bg-[#286C77]/30 text-[#D6D6D6] px-2 py-0.5 rounded border border-[#286C77]/50">智力 & 意志｜台Lv.3 / 料Lv.10</span>
-              </div>
-              <div class="flex flex-wrap gap-1.5 mt-2">
-                <span class="text-xs bg-[#1a1c1d] text-gray-200 px-2 py-0.5 rounded border border-[#707070]/40">蘋果 <strong class="text-amber-300">×12</strong></span>
-                <span class="text-xs bg-[#1a1c1d] text-gray-200 px-2 py-0.5 rounded border border-[#707070]/40">鮮奶油 <strong class="text-amber-300">×2</strong></span>
-                <span class="text-xs bg-[#1a1c1d] text-gray-200 px-2 py-0.5 rounded border border-[#707070]/40">麵粉 <strong class="text-amber-300">×4</strong></span>
-                <span class="text-xs bg-[#1a1c1d] text-gray-200 px-2 py-0.5 rounded border border-[#707070]/40">糖 <strong class="text-amber-300">×9</strong></span>
-              </div>
-            </div>
-
-            <!-- 奶油醬牛排 -->
-            <div class="p-3 rounded bg-[#222527]/80 border border-[#707070]/25 hover:border-[#286C77] transition">
-              <div class="flex items-center justify-between mb-1">
-                <span class="font-bold text-sm text-[#88d0dc]">🥩 奶油醬牛排</span>
-                <span class="text-[11px] bg-[#286C77]/30 text-[#D6D6D6] px-2 py-0.5 rounded border border-[#286C77]/50">力量 & 意志｜台Lv.3 / 料Lv.10</span>
-              </div>
-              <div class="flex flex-wrap gap-1.5 mt-2">
-                <span class="text-xs bg-[#1a1c1d] text-gray-200 px-2 py-0.5 rounded border border-[#707070]/40">肉 <strong class="text-amber-300">×10</strong></span>
-                <span class="text-xs bg-[#1a1c1d] text-gray-200 px-2 py-0.5 rounded border border-[#707070]/40">鮮奶油 <strong class="text-amber-300">×2</strong></span>
-                <span class="text-xs bg-[#1a1c1d] text-gray-200 px-2 py-0.5 rounded border border-[#707070]/40">大蒜 <strong class="text-amber-300">×2</strong></span>
-                <span class="text-xs bg-[#1a1c1d] text-gray-200 px-2 py-0.5 rounded border border-[#707070]/40">胡椒 <strong class="text-amber-300">×3</strong></span>
-              </div>
+            <!-- 份數計算切換按鈕 (1x / 10x / 20x / 30x) -->
+            <div class="inline-flex rounded-lg border border-[#323846] p-0.5 bg-[#12151A] text-xs">
+              <button onclick="setRecipeMultiplier(1)" id="multBtn_1" class="px-2 py-0.5 rounded font-bold bg-[#E5A93C] text-[#161920] transition">1份</button>
+              <button onclick="setRecipeMultiplier(10)" id="multBtn_10" class="px-2 py-0.5 rounded font-medium text-[#8E96A8] hover:text-white transition">10份</button>
+              <button onclick="setRecipeMultiplier(20)" id="multBtn_20" class="px-2 py-0.5 rounded font-medium text-[#8E96A8] hover:text-white transition">20份</button>
+              <button onclick="setRecipeMultiplier(30)" id="multBtn_30" class="px-2 py-0.5 rounded font-medium text-[#8E96A8] hover:text-white transition">30份</button>
             </div>
           </div>
+
+          <div id="recipeListContainer" class="space-y-3"></div>
         </div>
       </section>
 
       <!-- 待辦備忘區塊 (佔 7 欄) -->
-      <section class="lg:col-span-7 bg-[#2c3033] rounded-lg p-4 sm:p-5 shadow border border-[#707070]/40">
-        <div class="flex items-center justify-between gap-3 mb-3 border-b border-[#707070]/30 pb-2.5">
+      <section class="lg:col-span-7 bg-[#1E222B] rounded-xl p-4 sm:p-5 shadow border border-[#323846]">
+        <div class="flex items-center justify-between gap-3 mb-3.5 border-b border-[#323846] pb-2.5">
           <div class="flex items-center gap-2">
-            <i class="fa-solid fa-clipboard-list text-base text-[#88d0dc]"></i>
+            <i class="fa-solid fa-clipboard-list text-base text-[#E5A93C]"></i>
             <h2 class="text-base font-bold text-white">待辦事項與遊戲備忘</h2>
-            <span id="todoBadge" class="text-[11px] bg-[#286C77]/30 text-[#88d0dc] border border-[#286C77] px-2 py-0.2 rounded-full font-mono">0 個未完成</span>
+            <span id="todoBadge" class="text-[11px] bg-[#E5A93C]/15 text-[#E5A93C] border border-[#E5A93C]/40 px-2 py-0.2 rounded-full font-mono">0 個未完成</span>
           </div>
         </div>
 
@@ -245,11 +208,11 @@
             id="todoInput" 
             placeholder="輸入備忘事項（例如：高級羊毛不夠了、買鮮奶油...）按 Enter 新增" 
             onkeydown="if(event.key==='Enter') addTodo()" 
-            class="flex-1 bg-[#1a1c1d] border border-[#707070]/60 text-white rounded px-3 py-1.5 text-sm focus:outline-none focus:border-[#286C77] placeholder-[#707070]"
+            class="flex-1 bg-[#12151A] border border-[#323846] text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#E5A93C] placeholder-[#8E96A8]/60"
           >
           <button 
             onclick="addTodo()" 
-            class="bg-[#286C77] hover:bg-[#1e535c] text-white font-medium px-4 py-1.5 rounded transition flex items-center gap-1.5 text-xs whitespace-nowrap"
+            class="bg-[#E5A93C] hover:bg-[#D09222] text-[#161920] font-bold px-4 py-1.5 rounded-lg transition flex items-center gap-1.5 text-xs whitespace-nowrap"
           >
             <i class="fa-solid fa-plus"></i> 新增
           </button>
@@ -264,23 +227,23 @@
 
   <!-- 新增角色彈窗 -->
   <div id="addCharModal" class="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-[#2c3033] rounded-lg max-w-sm w-full p-5 shadow-xl border border-[#707070]">
-      <h2 id="modalTitle" class="text-base font-bold text-[#88d0dc] mb-3 flex items-center gap-1.5">
+    <div class="bg-[#1E222B] rounded-xl max-w-sm w-full p-5 shadow-2xl border border-[#323846]">
+      <h2 id="modalTitle" class="text-base font-bold text-[#E5A93C] mb-3 flex items-center gap-1.5">
         <i class="fa-solid fa-user-plus"></i> <span>新增分身角色</span>
       </h2>
       <input type="hidden" id="editCharId" value="">
 
       <div class="space-y-3">
         <div>
-          <label class="block text-xs font-medium text-[#D6D6D6] mb-1">角色名稱</label>
-          <input type="text" id="charNameInput" placeholder="例如：工具人三號" class="w-full bg-[#1a1c1d] border border-[#707070] text-white rounded px-3 py-1.5 text-sm focus:outline-none focus:border-[#286C77]">
+          <label class="block text-xs font-medium text-gray-300 mb-1">角色名稱</label>
+          <input type="text" id="charNameInput" placeholder="例如：工具人三號" class="w-full bg-[#12151A] border border-[#323846] text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#E5A93C]">
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-[#D6D6D6] mb-1">職業分支</label>
-          <select id="charClassSelect" class="w-full bg-[#1a1c1d] border border-[#707070] text-white rounded px-3 py-1.5 text-sm focus:outline-none focus:border-[#286C77]">
+          <label class="block text-xs font-medium text-gray-300 mb-1">職業分支</label>
+          <select id="charClassSelect" class="w-full bg-[#12151A] border border-[#323846] text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#E5A93C]">
             <optgroup label="戰士系列">
-              <option value="大劍戰士（大劍）">大劍戰士（大劍）</option>
+              <option value="大劍">大劍</option>
               <option value="戰士">戰士</option>
               <option value="劍術士">劍術士</option>
             </optgroup>
@@ -315,59 +278,56 @@
       </div>
 
       <div class="mt-4 flex justify-end gap-2">
-        <button onclick="closeModal('addCharModal')" class="px-3 py-1.5 text-[#D6D6D6] text-xs hover:bg-[#34383c] rounded transition">取消</button>
-        <button onclick="saveCharacter()" class="px-4 py-1.5 bg-[#286C77] hover:bg-[#1e535c] text-white font-medium text-xs rounded shadow transition">儲存</button>
+        <button onclick="closeModal('addCharModal')" class="px-3 py-1.5 text-[#8E96A8] text-xs hover:bg-[#262B36] rounded-lg transition">取消</button>
+        <button onclick="saveCharacter()" class="px-4 py-1.5 bg-[#E5A93C] hover:bg-[#D09222] text-[#161920] font-bold text-xs rounded-lg shadow transition">儲存</button>
       </div>
     </div>
   </div>
 
   <!-- 多人雲端同步與專屬代號設定彈窗 -->
   <div id="firebaseModal" class="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-[#2c3033] rounded-lg max-w-md w-full p-5 shadow-xl border border-[#707070]">
-      <h2 class="text-base font-bold text-[#88d0dc] mb-2 flex items-center gap-1.5">
+    <div class="bg-[#1E222B] rounded-xl max-w-md w-full p-5 shadow-2xl border border-[#323846]">
+      <h2 class="text-base font-bold text-[#E5A93C] mb-2 flex items-center gap-1.5">
         <i class="fa-solid fa-users-gear"></i> <span>多人雲端同步 & 專屬代號設定</span>
       </h2>
-      <p class="text-xs text-[#D6D6D6]/80 mb-3 leading-relaxed">
-        每個人只要輸入自己的<strong>「專屬代號」</strong>，就會擁有獨立的角色清單與待辦事項，再多人用也不會互相干擾！
+      <p class="text-xs text-[#8E96A8] mb-3 leading-relaxed">
+        每個人只要輸入自己的<strong class="text-gray-200">「專屬代號」</strong>，就會擁有獨立的角色清單與待辦事項，再多人用也不會互相干擾！
       </p>
 
       <div class="space-y-3.5">
-        <!-- 專屬代號 -->
-        <div class="p-3 rounded bg-[#1f2325] border border-[#286C77]">
-          <label class="block text-xs font-bold text-[#88d0dc] mb-1">
+        <div class="p-3 rounded-lg bg-[#161920] border border-[#E5A93C]/50">
+          <label class="block text-xs font-bold text-[#E5A93C] mb-1">
             <i class="fa-solid fa-id-badge mr-1"></i> 你的專屬代號 / 暱稱 (必填，區分不同人)
           </label>
-          <input type="text" id="fbProfileInput" placeholder="例如：阿程、老婆、玩家A..." class="w-full bg-[#1a1c1d] border border-[#707070] text-white rounded px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#88d0dc]">
-          <p class="text-[11px] text-[#D6D6D6]/60 mt-1">※ 在手機與電腦輸入相同代號即可同步；不同人請填不同代號。</p>
+          <input type="text" id="fbProfileInput" placeholder="例如：default、老婆、玩家A..." class="w-full bg-[#12151A] border border-[#323846] text-white rounded-lg px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#E5A93C]">
+          <p class="text-[11px] text-[#8E96A8] mt-1">※ 在手機與電腦輸入相同代號即可同步；不同人請填不同代號。</p>
           
-          <!-- 常用代號快速切換列 -->
-          <div id="recentProfilesContainer" class="mt-2.5 pt-2 border-t border-[#707070]/30 hidden">
-            <span class="block text-[11px] text-[#D6D6D6]/70 mb-1">曾用過的代號（點擊快速切換）：</span>
+          <div id="recentProfilesContainer" class="mt-2.5 pt-2 border-t border-[#323846] hidden">
+            <span class="block text-[11px] text-[#8E96A8] mb-1">曾用過的代號（點擊快速切換）：</span>
             <div id="recentProfilesList" class="flex flex-wrap gap-1.5"></div>
           </div>
         </div>
 
-        <!-- 進階資料庫設定 (預設已填好) -->
-        <details class="text-xs bg-[#222527] rounded p-2.5 border border-[#707070]/40">
-          <summary class="cursor-pointer text-[#D6D6D6] font-medium select-none">進階：Firebase 資料庫網址 (預設已內建，免改)</summary>
-          <div class="space-y-2.5 mt-2.5 pt-2 border-t border-[#707070]/30">
+        <details class="text-xs bg-[#161920] rounded-lg p-2.5 border border-[#323846]">
+          <summary class="cursor-pointer text-gray-300 font-medium select-none">進階：Firebase 資料庫網址 (預設已內建，免改)</summary>
+          <div class="space-y-2.5 mt-2.5 pt-2 border-t border-[#323846]">
             <div>
-              <label class="block text-[11px] text-[#D6D6D6] mb-1">Database URL</label>
-              <input type="text" id="fbDbUrlInput" class="w-full bg-[#1a1c1d] border border-[#707070] text-white rounded px-2.5 py-1 text-xs focus:outline-none focus:border-[#286C77]">
+              <label class="block text-[11px] text-[#8E96A8] mb-1">Database URL</label>
+              <input type="text" id="fbDbUrlInput" class="w-full bg-[#12151A] border border-[#323846] text-white rounded px-2.5 py-1 text-xs focus:outline-none focus:border-[#E5A93C]">
             </div>
             <div>
-              <label class="block text-[11px] text-[#D6D6D6] mb-1">API Key (選填)</label>
-              <input type="text" id="fbApiKeyInput" placeholder="留白即可" class="w-full bg-[#1a1c1d] border border-[#707070] text-white rounded px-2.5 py-1 text-xs focus:outline-none focus:border-[#286C77]">
+              <label class="block text-[11px] text-[#8E96A8] mb-1">API Key (選填)</label>
+              <input type="text" id="fbApiKeyInput" placeholder="留白即可" class="w-full bg-[#12151A] border border-[#323846] text-white rounded px-2.5 py-1 text-xs focus:outline-none focus:border-[#E5A93C]">
             </div>
           </div>
         </details>
       </div>
 
       <div class="mt-4 flex justify-between items-center">
-        <button onclick="disconnectFirebase()" class="px-2.5 py-1.5 text-red-400 hover:bg-red-950/40 text-xs rounded transition">切換回單機模式</button>
+        <button onclick="disconnectFirebase()" class="px-2.5 py-1.5 text-red-400 hover:bg-red-950/40 text-xs rounded-lg transition">切換回單機模式</button>
         <div class="flex gap-2">
-          <button onclick="closeModal('firebaseModal')" class="px-3 py-1.5 text-[#D6D6D6] text-xs hover:bg-[#34383c] rounded transition">關閉</button>
-          <button onclick="saveFirebaseConfig()" class="px-4 py-1.5 bg-[#286C77] hover:bg-[#1e535c] text-white font-medium text-xs rounded shadow transition">儲存並連線</button>
+          <button onclick="closeModal('firebaseModal')" class="px-3 py-1.5 text-[#8E96A8] text-xs hover:bg-[#262B36] rounded-lg transition">關閉</button>
+          <button onclick="saveFirebaseConfig()" class="px-4 py-1.5 bg-[#E5A93C] hover:bg-[#D09222] text-[#161920] font-bold text-xs rounded-lg shadow transition">儲存並連線</button>
         </div>
       </div>
     </div>
@@ -375,22 +335,57 @@
 
   <script>
     const DEFAULT_DB_URL = "https://mm-tracker-120ff-default-rtdb.asia-southeast1.firebasedatabase.app";
-    const TASK_FIELDS = ['grisbane', 'succubus', 'abyss', 'board', 'barrier', 'blackhole', 'cooking'];
+    // 簡化為 4 項核心週常：格里斯貝恩、白魅魔、深淵副本、布告欄&料理材料
+    const TASK_FIELDS = ['grisbane', 'succubus', 'abyss', 'board'];
+
+    // 料理配方資料庫
+    const RECIPES = [
+      {
+        name: "🥙 沙威瑪",
+        meta: "力量 & 幸運｜台Lv.4 / 料Lv.13",
+        ingredients: [
+          { item: "清淡的肉", count: 10 },
+          { item: "黃豆", count: 12 },
+          { item: "麵粉", count: 3 },
+          { item: "高麗菜", count: 5 },
+          { item: "檸檬", count: 2 }
+        ]
+      },
+      {
+        name: "🍰 蘋果鮮奶油蛋糕",
+        meta: "智力 & 意志｜台Lv.3 / 料Lv.10",
+        ingredients: [
+          { item: "蘋果", count: 12 },
+          { item: "鮮奶油", count: 2 },
+          { item: "麵粉", count: 4 },
+          { item: "糖", count: 9 }
+        ]
+      },
+      {
+        name: "🥩 奶油醬牛排",
+        meta: "力量 & 意志｜台Lv.3 / 料Lv.10",
+        ingredients: [
+          { item: "肉", count: 10 },
+          { item: "鮮奶油", count: 2 },
+          { item: "大蒜", count: 2 },
+          { item: "胡椒", count: 3 }
+        ]
+      }
+    ];
+
+    let currentMultiplier = 1;
 
     function getDefaultCharacters() {
       return [
         {
           id: "char_1",
           name: "工具人一號",
-          job: "大劍戰士（大劍）",
+          job: "大劍",
           grisbane: false,
           grisbaneDiff: "非常困難",
           succubus: false,
           abyss: false,
           board: false,
-          barrier: false,
-          blackhole: false,
-          cooking: false,
           runes: []
         },
         {
@@ -402,9 +397,6 @@
           succubus: false,
           abyss: false,
           board: false,
-          barrier: false,
-          blackhole: false,
-          cooking: false,
           runes: []
         }
       ];
@@ -416,18 +408,58 @@
       ];
     }
 
-    let characters = JSON.parse(localStorage.getItem('mabi_characters')) || getDefaultCharacters();
-    characters.forEach(c => { if (typeof c.cooking === 'undefined') c.cooking = false; });
+    // 自動升級舊角色資料（把「大劍戰士（大劍）」自動轉為「大劍」）
+    function normalizeCharacters(list) {
+      return (list || []).map(c => ({
+        ...c,
+        job: c.job === "大劍戰士（大劍）" ? "大劍" : c.job,
+        board: Boolean(c.board || c.cooking),
+        runes: c.runes || []
+      }));
+    }
 
+    let characters = normalizeCharacters(JSON.parse(localStorage.getItem('mabi_characters')) || getDefaultCharacters());
     let todos = JSON.parse(localStorage.getItem('mabi_todos')) || getDefaultTodos();
     let currentView = localStorage.getItem('mabi_view') || 'card';
+
+    // 渲染料理配方速查
+    function setRecipeMultiplier(mult) {
+      currentMultiplier = mult;
+      [1, 10, 20, 30].forEach(m => {
+        const btn = document.getElementById(`multBtn_${m}`);
+        if (m === mult) {
+          btn.className = "px-2 py-0.5 rounded font-bold bg-[#E5A93C] text-[#161920] transition";
+        } else {
+          btn.className = "px-2 py-0.5 rounded font-medium text-[#8E96A8] hover:text-white transition";
+        }
+      });
+      renderRecipes();
+    }
+
+    function renderRecipes() {
+      const container = document.getElementById('recipeListContainer');
+      container.innerHTML = RECIPES.map(r => `
+        <div class="p-3 rounded-lg bg-[#161920] border border-[#323846] hover:border-[#E5A93C]/50 transition">
+          <div class="flex flex-wrap items-center justify-between gap-1 mb-1.5">
+            <span class="font-bold text-sm text-gray-100">${r.name} <span class="text-xs font-mono text-[#E5A93C]">(${currentMultiplier}份)</span></span>
+            <span class="text-[11px] bg-[#262B36] text-[#8E96A8] px-2 py-0.5 rounded border border-[#323846]">${r.meta}</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5 mt-2">
+            ${r.ingredients.map(ing => `
+              <span class="text-xs bg-[#1E222B] text-gray-200 px-2.5 py-0.5 rounded border border-[#323846]">
+                ${ing.item} <strong class="text-[#E5A93C] font-mono">×${ing.count * currentMultiplier}</strong>
+              </span>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
 
     // Firebase 狀態變數
     let dbRef = null;
     let isRemoteUpdating = false;
     let currentProfile = "";
 
-    // 清理代號中的非法字元 (Firebase 路徑不可含 . # $ [ ] /)
     function sanitizeProfileKey(str) {
       return str.trim().replace(/[.#$\[\]\/]/g, '_');
     }
@@ -444,7 +476,6 @@
 
       renderRecentProfiles();
 
-      // 若尚未設定專屬代號，維持單機模式，等待使用者填寫代號
       if (!savedConfig || !savedConfig.databaseURL || !profileId) {
         updateCloudUI(false);
         return;
@@ -463,7 +494,6 @@
 
         if (dbRef) dbRef.off();
 
-        // 若代號為 default，為了相容你第一版的舊路徑，直接讀寫 mabi_tracker_data 根目錄；否則讀寫各自獨立的 mabi_tracker_users/{代號}
         const dbPath = (safeKey === 'default') ? 'mabi_tracker_data' : `mabi_tracker_users/${safeKey}`;
         dbRef = firebase.database().ref(dbPath);
 
@@ -471,30 +501,16 @@
           const val = snapshot.val();
           if (val) {
             isRemoteUpdating = true;
-            if (val.characters) {
-              characters = val.characters.map(c => ({
-                ...c,
-                cooking: typeof c.cooking !== 'undefined' ? c.cooking : false,
-                runes: c.runes || []
-              }));
-            } else {
-              characters = [];
-            }
+            characters = val.characters ? normalizeCharacters(val.characters) : [];
             localStorage.setItem('mabi_characters', JSON.stringify(characters));
 
-            if (val.todos) {
-              todos = val.todos;
-            } else {
-              todos = [];
-            }
+            todos = val.todos ? val.todos : [];
             localStorage.setItem('mabi_todos', JSON.stringify(todos));
 
             render();
             renderTodos();
             isRemoteUpdating = false;
           } else {
-            // 雲端此代號還是全新空白的：
-            // 若是剛剛切換到一個新代號，給予乾淨預設值並推上雲端，避免把前一個人的本地資料蓋過去
             if (localStorage.getItem('mabi_just_switched') === 'true') {
               characters = getDefaultCharacters();
               todos = getDefaultTodos();
@@ -522,10 +538,10 @@
       const icon = document.getElementById('cloudIcon');
       const text = document.getElementById('cloudText');
       if (connected) {
-        icon.className = "fa-solid fa-cloud text-emerald-400";
+        icon.className = "fa-solid fa-cloud text-[#38A169]";
         text.textContent = `雲端：${labelText}`;
       } else {
-        icon.className = "fa-solid fa-cloud text-gray-400";
+        icon.className = "fa-solid fa-cloud text-gray-500";
         text.textContent = labelText || "點此設定雲端代號";
       }
     }
@@ -550,7 +566,7 @@
       }
       container.classList.remove('hidden');
       list.innerHTML = recent.map(p => `
-        <button onclick="quickSwitchProfile('${p}')" class="text-xs px-2.5 py-1 rounded border transition ${p === currentProfile ? 'bg-[#286C77] text-white border-[#88d0dc] font-bold' : 'bg-[#1a1c1d] text-[#D6D6D6] border-[#707070]/50 hover:border-[#88d0dc]'}">
+        <button onclick="quickSwitchProfile('${p}')" class="text-xs px-2.5 py-1 rounded border transition ${p === currentProfile ? 'bg-[#E5A93C] text-[#161920] border-[#E5A93C] font-bold' : 'bg-[#12151A] text-gray-300 border-[#323846] hover:border-[#E5A93C]'}">
           ${p}
         </button>
       `).join('');
@@ -567,7 +583,7 @@
       const profileId = document.getElementById('fbProfileInput').value.trim();
 
       if (!profileId) {
-        alert("請輸入你的「專屬代號 / 暱稱」（例如你的名字）！");
+        alert("請輸入你的「專屬代號 / 暱稱」！");
         return;
       }
 
@@ -576,7 +592,6 @@
         localStorage.setItem('mabi_just_switched', 'true');
       }
 
-      // 儲存常用代號紀錄
       let recent = JSON.parse(localStorage.getItem('mabi_recent_profiles') || '[]');
       if (!recent.includes(profileId)) {
         recent.push(profileId);
@@ -641,13 +656,13 @@
       if (mode === 'card') {
         cardContainer.classList.remove('hidden');
         tableContainer.classList.add('hidden');
-        cardBtn.className = "px-2.5 py-1 rounded font-medium bg-[#286C77] text-white";
-        tableBtn.className = "px-2.5 py-1 rounded font-medium text-[#D6D6D6] hover:text-white";
+        cardBtn.className = "px-2.5 py-1 rounded-md font-bold bg-[#E5A93C] text-[#161920]";
+        tableBtn.className = "px-2.5 py-1 rounded-md font-medium text-[#8E96A8] hover:text-white";
       } else {
         cardContainer.classList.add('hidden');
         tableContainer.classList.remove('hidden');
-        tableBtn.className = "px-2.5 py-1 rounded font-medium bg-[#286C77] text-white";
-        cardBtn.className = "px-2.5 py-1 rounded font-medium text-[#D6D6D6] hover:text-white";
+        tableBtn.className = "px-2.5 py-1 rounded-md font-bold bg-[#E5A93C] text-[#161920]";
+        cardBtn.className = "px-2.5 py-1 rounded-md font-medium text-[#8E96A8] hover:text-white";
       }
     }
 
@@ -690,7 +705,7 @@
     }
 
     function confirmResetWeek() {
-      if (confirm("確定要重置所有角色的本週 7 項週常勾選嗎？（聽牌符文、角色與待辦事項將會保留）")) {
+      if (confirm("確定要重置所有角色的本週 4 項週常勾選嗎？（聽牌符文、角色與待辦事項將會保留）")) {
         characters.forEach(char => {
           TASK_FIELDS.forEach(f => char[f] = false);
         });
@@ -747,9 +762,6 @@
           succubus: false,
           abyss: false,
           board: false,
-          barrier: false,
-          blackhole: false,
-          cooking: false,
           runes: []
         });
       }
@@ -791,19 +803,19 @@
       document.getElementById('todoBadge').textContent = `${pendingCount} 個未完成`;
 
       if (todos.length === 0) {
-        list.innerHTML = `<li class="text-[#707070] italic text-xs py-1.5">目前沒有待辦事項。</li>`;
+        list.innerHTML = `<li class="text-[#8E96A8] italic text-xs py-1.5">目前沒有待辦事項。</li>`;
         return;
       }
 
       todos.forEach(item => {
         const li = document.createElement('li');
-        li.className = "flex items-center justify-between p-2 rounded bg-[#222527]/70 border border-[#707070]/20 hover:border-[#707070]/50 transition group";
+        li.className = "flex items-center justify-between p-2.5 rounded-lg bg-[#161920] border border-[#323846] hover:border-[#4A5265] transition group";
         li.innerHTML = `
           <label class="flex items-center gap-2.5 cursor-pointer flex-1 select-none">
             <input type="checkbox" class="custom-checkbox" ${item.done ? 'checked' : ''} onchange="toggleTodo('${item.id}')">
-            <span class="text-sm transition ${item.done ? 'line-through text-[#707070]' : 'text-gray-100'}">${item.text}</span>
+            <span class="text-sm transition ${item.done ? 'line-through text-[#8E96A8]' : 'text-gray-100'}">${item.text}</span>
           </label>
-          <button onclick="deleteTodo('${item.id}')" class="text-xs text-[#707070] hover:text-red-400 px-1.5 py-0.5 transition opacity-70 group-hover:opacity-100">
+          <button onclick="deleteTodo('${item.id}')" class="text-xs text-[#8E96A8] hover:text-red-400 px-1.5 py-0.5 transition opacity-70 group-hover:opacity-100">
             <i class="fa-solid fa-trash-can"></i>
           </button>
         `;
@@ -834,9 +846,9 @@
         try {
           const imported = JSON.parse(evt.target.result);
           if (Array.isArray(imported)) {
-            characters = imported;
+            characters = normalizeCharacters(imported);
           } else if (imported.characters) {
-            characters = imported.characters || [];
+            characters = normalizeCharacters(imported.characters || []);
             todos = imported.todos || [];
           }
           saveData();
@@ -850,7 +862,7 @@
     }
 
     function render() {
-      const totalTasksPerChar = TASK_FIELDS.length;
+      const totalTasksPerChar = TASK_FIELDS.length; // 4項
       let totalTasks = characters.length * totalTasksPerChar;
       let completedTasks = 0;
 
@@ -865,100 +877,83 @@
           if (char[f]) { completedTasks++; charDone++; }
         });
         const charPct = Math.round((charDone / totalTasksPerChar) * 100);
+        const isAllDone = charDone === totalTasksPerChar;
 
         // 卡片檢視
         const card = document.createElement('div');
-        card.className = "bg-[#2c3033] rounded-lg shadow border border-[#707070]/40 overflow-hidden flex flex-col justify-between hover:border-[#286C77] transition";
+        card.className = `bg-[#1E222B] rounded-xl shadow border ${isAllDone ? 'border-[#38A169]/60' : 'border-[#323846]'} overflow-hidden flex flex-col justify-between hover:border-[#E5A93C]/60 transition`;
         card.innerHTML = `
           <div>
-            <div class="px-3.5 py-2.5 bg-[#1f2325] border-b border-[#707070]/30 flex justify-between items-center">
+            <div class="px-4 py-3 bg-[#262B36]/70 border-b border-[#323846] flex justify-between items-center">
               <div>
-                <h3 class="font-bold text-base text-white">${char.name}</h3>
-                <span class="inline-block mt-0.5 text-[11px] font-semibold px-2 py-0.2 rounded bg-[#286C77]/25 text-[#88d0dc] border border-[#286C77]">
+                <h3 class="font-bold text-base text-white flex items-center gap-1.5">
+                  ${char.name}
+                  ${isAllDone ? '<i class="fa-solid fa-circle-check text-[#38A169] text-xs" title="本週已全清"></i>' : ''}
+                </h3>
+                <span class="inline-block mt-0.5 text-[11px] font-semibold px-2 py-0.2 rounded bg-[#E5A93C]/15 text-[#E5A93C] border border-[#E5A93C]/30">
                   ${char.job}
                 </span>
               </div>
               <div class="text-right">
-                <div class="text-sm font-bold text-[#88d0dc] font-mono">${charDone}/${totalTasksPerChar} (${charPct}%)</div>
-                <button onclick="deleteChar('${char.id}')" class="text-[11px] text-[#707070] hover:text-red-400 transition mt-0.5">
+                <div class="text-sm font-bold ${isAllDone ? 'text-[#38A169]' : 'text-[#E5A93C]'} font-mono">${charDone}/${totalTasksPerChar} (${charPct}%)</div>
+                <button onclick="deleteChar('${char.id}')" class="text-[11px] text-[#8E96A8] hover:text-red-400 transition mt-0.5">
                   <i class="fa-solid fa-trash-can"></i> 刪除
                 </button>
               </div>
             </div>
 
-            <div class="p-3 space-y-1.5">
-              <div class="flex items-center justify-between p-2 rounded bg-[#222527]/70 border border-[#707070]/20">
+            <div class="p-3.5 space-y-2">
+              <div class="flex items-center justify-between p-2 rounded-lg bg-[#161920] border border-[#323846]/70">
                 <label class="flex items-center gap-2.5 cursor-pointer">
                   <input type="checkbox" class="custom-checkbox" ${char.grisbane ? 'checked' : ''} onchange="toggleTask('${char.id}', 'grisbane')">
-                  <span class="text-sm text-[#D6D6D6]">團隊 - 格里斯貝恩</span>
+                  <span class="text-sm ${char.grisbane ? 'line-through text-[#8E96A8]' : 'text-gray-200'}">團隊 - 格里斯貝恩</span>
                 </label>
-                <button onclick="toggleDifficulty('${char.id}')" class="text-[10px] font-bold px-1.5 py-0.5 rounded border transition ${char.grisbaneDiff === '非常困難' ? 'bg-red-950/60 text-red-300 border-red-800' : 'bg-amber-950/60 text-amber-300 border-amber-800'}">
+                <button onclick="toggleDifficulty('${char.id}')" class="text-[10px] font-bold px-2 py-0.5 rounded border transition ${char.grisbaneDiff === '非常困難' ? 'bg-red-950/60 text-red-300 border-red-800/80' : 'bg-amber-950/60 text-amber-300 border-amber-800/80'}">
                   ${char.grisbaneDiff}
                 </button>
               </div>
 
-              <div class="flex items-center justify-between p-2 rounded bg-[#222527]/70 border border-[#707070]/20">
+              <div class="flex items-center justify-between p-2 rounded-lg bg-[#161920] border border-[#323846]/70">
                 <label class="flex items-center gap-2.5 cursor-pointer w-full">
                   <input type="checkbox" class="custom-checkbox" ${char.succubus ? 'checked' : ''} onchange="toggleTask('${char.id}', 'succubus')">
-                  <span class="text-sm text-[#D6D6D6]">團隊 - 白魅魔</span>
+                  <span class="text-sm ${char.succubus ? 'line-through text-[#8E96A8]' : 'text-gray-200'}">團隊 - 白魅魔</span>
                 </label>
               </div>
 
-              <div class="flex items-center justify-between p-2 rounded bg-[#222527]/70 border border-[#707070]/20">
+              <div class="flex items-center justify-between p-2 rounded-lg bg-[#161920] border border-[#323846]/70">
                 <label class="flex items-center gap-2.5 cursor-pointer w-full">
                   <input type="checkbox" class="custom-checkbox" ${char.abyss ? 'checked' : ''} onchange="toggleTask('${char.id}', 'abyss')">
-                  <span class="text-sm text-[#D6D6D6]">深淵副本</span>
+                  <span class="text-sm ${char.abyss ? 'line-through text-[#8E96A8]' : 'text-gray-200'}">深淵副本</span>
                 </label>
               </div>
 
-              <div class="flex items-center justify-between p-2 rounded bg-[#222527]/70 border border-[#707070]/20">
+              <div class="flex items-center justify-between p-2 rounded-lg bg-[#161920] border border-[#323846]/70">
                 <label class="flex items-center gap-2.5 cursor-pointer w-full">
                   <input type="checkbox" class="custom-checkbox" ${char.board ? 'checked' : ''} onchange="toggleTask('${char.id}', 'board')">
-                  <span class="text-sm text-[#D6D6D6]">任務布告欄</span>
-                </label>
-              </div>
-
-              <div class="flex items-center justify-between p-2 rounded bg-[#222527]/70 border border-[#707070]/20">
-                <label class="flex items-center gap-2.5 cursor-pointer w-full">
-                  <input type="checkbox" class="custom-checkbox" ${char.barrier ? 'checked' : ''} onchange="toggleTask('${char.id}', 'barrier')">
-                  <span class="text-sm text-[#D6D6D6]">結界打乾淨沒</span>
-                </label>
-              </div>
-
-              <div class="flex items-center justify-between p-2 rounded bg-[#222527]/70 border border-[#707070]/20">
-                <label class="flex items-center gap-2.5 cursor-pointer w-full">
-                  <input type="checkbox" class="custom-checkbox" ${char.blackhole ? 'checked' : ''} onchange="toggleTask('${char.id}', 'blackhole')">
-                  <span class="text-sm text-[#D6D6D6]">黑洞打乾淨沒</span>
-                </label>
-              </div>
-
-              <div class="flex items-center justify-between p-2 rounded bg-[#222527]/70 border border-[#707070]/20">
-                <label class="flex items-center gap-2.5 cursor-pointer w-full">
-                  <input type="checkbox" class="custom-checkbox" ${char.cooking ? 'checked' : ''} onchange="toggleTask('${char.id}', 'cooking')">
-                  <span class="text-sm text-[#D6D6D6]">購買每週料理材料</span>
+                  <span class="text-sm ${char.board ? 'line-through text-[#8E96A8]' : 'text-gray-200'}">任務布告欄 & 料理材料</span>
                 </label>
               </div>
             </div>
           </div>
 
           <!-- 聽牌符文 -->
-          <div class="px-3 py-2.5 bg-[#1f2325] border-t border-[#707070]/30">
-            <span class="block text-[11px] font-bold text-[#88d0dc] mb-1.5 flex items-center gap-1">
-              <i class="fa-solid fa-gem text-[#286C77]"></i> 聽牌的符文
+          <div class="px-3.5 py-2.5 bg-[#161920]/90 border-t border-[#323846]">
+            <span class="block text-[11px] font-bold text-[#E5A93C] mb-1.5 flex items-center gap-1">
+              <i class="fa-solid fa-gem"></i> 聽牌的符文
             </span>
             <div class="flex flex-wrap gap-1 mb-2 min-h-[24px]">
               ${(char.runes && char.runes.length > 0) 
                 ? char.runes.map(r => `
-                    <span class="inline-flex items-center gap-1 text-[11px] bg-[#286C77]/20 text-[#88d0dc] font-medium px-2 py-0.5 rounded border border-[#286C77]/50">
+                    <span class="inline-flex items-center gap-1 text-[11px] bg-[#262B36] text-gray-200 font-medium px-2 py-0.5 rounded border border-[#4A5265]">
                       ${r}
-                      <button onclick="removeRune('${char.id}', '${r}')" class="hover:text-red-400 ml-0.5">×</button>
+                      <button onclick="removeRune('${char.id}', '${r}')" class="hover:text-red-400 ml-0.5 text--[#8E96A8]">×</button>
                     </span>
                   `).join('') 
-                : '<span class="text-[11px] text-[#707070] italic">無</span>'}
+                : '<span class="text-[11px] text-[#8E96A8]/60 italic">無</span>'}
             </div>
             <div class="flex gap-1.5">
-              <input type="text" id="rune_input_${char.id}" placeholder="輸入符文按 Enter..." onkeydown="if(event.key==='Enter') addRune('${char.id}', this)" class="w-full text-xs px-2 py-1 border border-[#707070]/50 rounded bg-[#1a1c1d] text-white focus:outline-none focus:border-[#286C77]">
-              <button onclick="addRune('${char.id}', document.getElementById('rune_input_${char.id}'))" class="text-xs bg-[#286C77] text-white px-2.5 py-1 rounded hover:bg-[#1e535c] whitespace-nowrap">新增</button>
+              <input type="text" id="rune_input_${char.id}" placeholder="輸入符文按 Enter..." onkeydown="if(event.key==='Enter') addRune('${char.id}', this)" class="w-full text-xs px-2.5 py-1 border border-[#323846] rounded-md bg-[#12151A] text-white focus:outline-none focus:border-[#E5A93C]">
+              <button onclick="addRune('${char.id}', document.getElementById('rune_input_${char.id}'))" class="text-xs bg-[#262B36] hover:bg-[#323846] text-[#E5A93C] border border-[#323846] px-2.5 py-1 rounded-md whitespace-nowrap font-medium transition">新增</button>
             </div>
           </div>
         `;
@@ -966,11 +961,11 @@
 
         // 矩陣表格檢視
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-[#34383c]/60 transition";
+        tr.className = "hover:bg-[#262B36]/50 transition";
         tr.innerHTML = `
-          <td class="py-2.5 px-3">
+          <td class="py-2.5 px-4">
             <div class="font-bold text-white text-sm">${char.name}</div>
-            <div class="text-[11px] text-[#88d0dc]">${char.job}</div>
+            <div class="text-[11px] text-[#E5A93C]">${char.job}</div>
           </td>
           <td class="py-2.5 px-2 text-center">
             <div class="flex flex-col items-center gap-0.5">
@@ -989,33 +984,24 @@
           <td class="py-2.5 px-2 text-center">
             <input type="checkbox" class="custom-checkbox" ${char.board ? 'checked' : ''} onchange="toggleTask('${char.id}', 'board')">
           </td>
-          <td class="py-2.5 px-2 text-center">
-            <input type="checkbox" class="custom-checkbox" ${char.barrier ? 'checked' : ''} onchange="toggleTask('${char.id}', 'barrier')">
-          </td>
-          <td class="py-2.5 px-2 text-center">
-            <input type="checkbox" class="custom-checkbox" ${char.blackhole ? 'checked' : ''} onchange="toggleTask('${char.id}', 'blackhole')">
-          </td>
-          <td class="py-2.5 px-2 text-center">
-            <input type="checkbox" class="custom-checkbox" ${char.cooking ? 'checked' : ''} onchange="toggleTask('${char.id}', 'cooking')">
-          </td>
           <td class="py-2.5 px-3">
             <div class="flex flex-wrap gap-1 mb-1">
               ${(char.runes && char.runes.length > 0)
                 ? char.runes.map(r => `
-                    <span class="inline-flex items-center text-[10px] bg-[#286C77]/20 text-[#88d0dc] px-1.5 py-0.5 rounded border border-[#286C77]/50">
+                    <span class="inline-flex items-center text-[10px] bg-[#262B36] text-gray-200 px-1.5 py-0.5 rounded border border-[#4A5265]">
                       ${r}
                       <button onclick="removeRune('${char.id}', '${r}')" class="hover:text-red-400 ml-0.5">×</button>
                     </span>
                   `).join('')
-                : '<span class="text-[11px] text-[#707070]">無</span>'}
+                : '<span class="text-[11px] text-[#8E96A8]/60">無</span>'}
             </div>
             <div class="flex gap-1">
-              <input type="text" id="rune_table_input_${char.id}" placeholder="+符文" onkeydown="if(event.key==='Enter') addRune('${char.id}', this)" class="text-xs px-1.5 py-0.5 bg-[#1a1c1d] border border-[#707070]/50 text-white rounded w-24 focus:outline-none focus:border-[#286C77]">
-              <button onclick="addRune('${char.id}', document.getElementById('rune_table_input_${char.id}'))" class="text-xs bg-[#286C77] text-white px-1.5 py-0.5 rounded">+</button>
+              <input type="text" id="rune_table_input_${char.id}" placeholder="+符文" onkeydown="if(event.key==='Enter') addRune('${char.id}', this)" class="text-xs px-1.5 py-0.5 bg-[#12151A] border border-[#323846] text-white rounded w-24 focus:outline-none focus:border-[#E5A93C]">
+              <button onclick="addRune('${char.id}', document.getElementById('rune_table_input_${char.id}'))" class="text-xs bg-[#262B36] text-[#E5A93C] border border-[#323846] px-1.5 py-0.5 rounded">+</button>
             </div>
           </td>
           <td class="py-2.5 px-2 text-center">
-            <button onclick="deleteChar('${char.id}')" class="text-xs text-red-400 hover:text-red-300">刪除</button>
+            <button onclick="deleteChar('${char.id}')" class="text-xs text-[#8E96A8] hover:text-red-400">刪除</button>
           </td>
         `;
         tableBody.appendChild(tr);
@@ -1029,6 +1015,7 @@
     setViewMode(currentView);
     render();
     renderTodos();
+    renderRecipes();
     initFirebase();
   </script>
 </body>
