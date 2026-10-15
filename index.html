@@ -335,10 +335,9 @@
 
   <script>
     const DEFAULT_DB_URL = "https://mm-tracker-120ff-default-rtdb.asia-southeast1.firebasedatabase.app";
-    // 簡化為 4 項核心週常：格里斯貝恩、白魅魔、深淵副本、布告欄&料理材料
     const TASK_FIELDS = ['grisbane', 'succubus', 'abyss', 'board'];
 
-    // 料理配方資料庫
+    // 料理配方資料庫 (已新增蒸蛤蜊、鱸魚辣魚湯)
     const RECIPES = [
       {
         name: "🥙 沙威瑪",
@@ -370,7 +369,7 @@
           { item: "大蒜", count: 2 },
           { item: "胡椒", count: 3 }
         ]
-      }
+      },
       {
         name: "🐚 蒸蛤蜊",
         meta: "力量 & 幸運｜台Lv.3 / 料Lv.10",
@@ -430,7 +429,6 @@
       ];
     }
 
-    // 自動升級舊角色資料（把「大劍戰士（大劍）」自動轉為「大劍」）
     function normalizeCharacters(list) {
       return (list || []).map(c => ({
         ...c,
@@ -444,7 +442,6 @@
     let todos = JSON.parse(localStorage.getItem('mabi_todos')) || getDefaultTodos();
     let currentView = localStorage.getItem('mabi_view') || 'card';
 
-    // 渲染料理配方速查
     function setRecipeMultiplier(mult) {
       currentMultiplier = mult;
       [1, 10, 20, 30].forEach(m => {
@@ -477,7 +474,6 @@
       `).join('');
     }
 
-    // Firebase 狀態變數
     let dbRef = null;
     let isRemoteUpdating = false;
     let currentProfile = "";
@@ -884,7 +880,7 @@
     }
 
     function render() {
-      const totalTasksPerChar = TASK_FIELDS.length; // 4項
+      const totalTasksPerChar = TASK_FIELDS.length;
       let totalTasks = characters.length * totalTasksPerChar;
       let completedTasks = 0;
 
@@ -968,7 +964,7 @@
                 ? char.runes.map(r => `
                     <span class="inline-flex items-center gap-1 text-[11px] bg-[#262B36] text-gray-200 font-medium px-2 py-0.5 rounded border border-[#4A5265]">
                       ${r}
-                      <button onclick="removeRune('${char.id}', '${r}')" class="hover:text-red-400 ml-0.5 text--[#8E96A8]">×</button>
+                      <button onclick="removeRune('${char.id}', '${r}')" class="hover:text-red-400 ml-0.5 text-[#8E96A8]">×</button>
                     </span>
                   `).join('') 
                 : '<span class="text-[11px] text-[#8E96A8]/60 italic">無</span>'}
