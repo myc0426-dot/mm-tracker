@@ -314,16 +314,17 @@
         <i class="fa-solid fa-users-gear"></i> <span>多人雲端同步 & 專屬代號設定</span>
       </h2>
       <p class="text-xs text-[#8E96A8] mb-3 leading-relaxed">
-        每個人只要輸入自己的<strong class="text-gray-200">「專屬代號」</strong>，就會擁有獨立的角色清單與待辦事項，再多人用也不會互相干擾！
+        <strong class="text-gray-200">沒有代號也能用</strong>：資料存在這台裝置（單機模式）。<br>
+        <strong class="text-gray-200">有核准代號</strong>才能跨裝置／多人同步；新代號需管理員在 Firebase 手動開通後才能連線。
       </p>
 
       <div class="space-y-3.5">
         <div class="p-3 rounded-lg bg-[#161920] border border-[#E5A93C]/50">
           <label class="block text-xs font-bold text-[#E5A93C] mb-1">
-            <i class="fa-solid fa-id-badge mr-1"></i> 你的專屬代號 / 暱稱 (必填，區分不同人)
+            <i class="fa-solid fa-id-badge mr-1"></i> 你的專屬代號 / 暱稱（雲端同步用，需已開通）
           </label>
           <input type="text" id="fbProfileInput" placeholder="例如：default、老婆、玩家A..." class="w-full bg-[#12151A] border border-[#323846] text-white rounded-lg px-3 py-1.5 text-sm font-bold focus:outline-none focus:border-[#E5A93C]">
-          <p class="text-[11px] text-[#8E96A8] mt-1">※ 在手機與電腦輸入相同代號即可同步；不同人請填不同代號。</p>
+          <p class="text-[11px] text-[#8E96A8] mt-1">※ 同代號可跨裝置同步；未開通會拒絕連線，網站仍可單機使用。</p>
           
           <div id="recentProfilesContainer" class="mt-2.5 pt-2 border-t border-[#323846] hidden">
             <span class="block text-[11px] text-[#8E96A8] mb-1">曾用過的代號（點擊快速切換）：</span>
@@ -505,7 +506,29 @@
       return str.trim().replace(/[.#$\[\]\/]/g, '_');
     }
 
-    function initFirebase() {
+    const ALLOW_REFUSE_MSG = "此代號尚未開放，請向管理員申請；網站仍可單機使用，只是無法跨裝置同步。";
+
+    function disconnectCloudClean() {
+      if (dbRef) {
+        try { dbRef.off(); } catch (e) {}
+        dbRef = null;
+      }
+      try {
+        if (firebase.apps.length) firebase.database().goOffline();
+      } catch (e) {}
+    }
+
+    function refuseCloudAccess(showAlert) {
+      disconnectCloudClean();
+      currentProfile = "";
+      updateCloudUI(false, "代號未開放（單機中）");
+      if (showAlert) {
+        alert(ALLOW_REFUSE_MSG);
+      }
+      try { sessionStorage.removeItem('mabi_fb_connecting'); } catch (e) {}
+    }
+
+    async function initFirebase() {
       const savedConfig = JSON.parse(localStorage.getItem('mabi_fb_config') || 'null');
       const dbUrl = (savedConfig && savedConfig.databaseURL) ? savedConfig.databaseURL : DEFAULT_DB_URL;
       const apiKey = (savedConfig && savedConfig.apiKey) ? savedConfig.apiKey : "";
@@ -522,8 +545,10 @@
         return;
       }
 
-      currentProfile = profileId;
       const safeKey = sanitizeProfileKey(profileId);
+      const showAlert = (() => {
+        try { return sessionStorage.getItem('mabi_fb_connecting') === '1'; } catch (e) { return false; }
+      })();
 
       try {
         if (!firebase.apps.length) {
@@ -531,10 +556,21 @@
             apiKey: apiKey || "demo-key",
             databaseURL: dbUrl
           });
+        } else {
+          try { firebase.database().goOnline(); } catch (e) {}
         }
 
-        if (dbRef) dbRef.off();
+        disconnectCloudClean();
+        try { firebase.database().goOnline(); } catch (e) {}
 
+        // 連線前先查白名單；未開通則拒絕，保持單機
+        const allowSnap = await firebase.database().ref('allowed_profiles/' + safeKey).once('value');
+        if (allowSnap.val() !== true) {
+          refuseCloudAccess(true);
+          return;
+        }
+
+        currentProfile = profileId;
         const dbPath = (safeKey === 'default') ? 'mabi_tracker_data' : `mabi_tracker_users/${safeKey}`;
         dbRef = firebase.database().ref(dbPath);
 
@@ -567,11 +603,15 @@
           updateCloudUI(true, currentProfile);
         }, (err) => {
           console.error("Firebase 讀取失敗:", err);
+          disconnectCloudClean();
           updateCloudUI(false, "連線錯誤");
         });
+
+        try { sessionStorage.removeItem('mabi_fb_connecting'); } catch (e) {}
       } catch (e) {
         console.error(e);
-        updateCloudUI(false, "設定錯誤");
+        refuseCloudAccess(true);
+        updateCloudUI(false, "設定錯誤／代號未開放");
       }
     }
 
@@ -640,12 +680,14 @@
       }
 
       localStorage.setItem('mabi_fb_config', JSON.stringify({ databaseURL, apiKey, profileId }));
+      try { sessionStorage.setItem('mabi_fb_connecting', '1'); } catch (e) {}
       closeModal('firebaseModal');
       location.reload();
     }
 
     function disconnectFirebase() {
       if (confirm("確定要切換回單機模式嗎？（本地資料仍會保留）")) {
+        disconnectCloudClean();
         localStorage.removeItem('mabi_fb_config');
         location.reload();
       }
