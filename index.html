@@ -470,12 +470,15 @@
     }
 
     function normalizeCharacters(list) {
-      return (list || []).map(c => ({
-        ...c,
-        job: c.job === "大劍戰士（大劍）" ? "大劍" : c.job,
-        board: Boolean(c.board || c.cooking),
-        runes: c.runes || []
-      }));
+      return (list || []).map(c => {
+        const { cooking, ...rest } = c;
+        return {
+          ...rest,
+          job: c.job === "大劍戰士（大劍）" ? "大劍" : c.job,
+          board: Boolean(c.board || cooking),
+          runes: c.runes || []
+        };
+      });
     }
 
     let characters = normalizeCharacters(JSON.parse(localStorage.getItem('mabi_characters')) || getDefaultCharacters());
@@ -807,6 +810,7 @@
       if (confirm("確定要重置所有角色的本週 4 項週常勾選嗎？（聽牌符文、角色與待辦事項將會保留）")) {
         characters.forEach(char => {
           TASK_FIELDS.forEach(f => char[f] = false);
+          delete char.cooking;
         });
         saveData();
       }
