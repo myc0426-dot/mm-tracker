@@ -11,7 +11,7 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>瑪奇 Mobile - 多分身週常進度管理</title>
+  <title>瑪奇 Mobile - 多功能工具箱</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMxRTIyMkIiLz48cmVjdCB4PSIzIiB5PSIzIiB3aWR0aD0iNTgiIGhlaWdodD0iNTgiIHJ4PSIxMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRTVBOTNDIiBzdHJva2Utd2lkdGg9IjMiLz48cGF0aCBkPSJNMTQgNDZWMThsMTAgMTQgOC0xNCA4IDE0IDEwLTE0djI4IiBmaWxsPSJub25lIiBzdHJva2U9IiNFNUE5M0MiIHN0cm9rZS13aWR0aD0iNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+Cg==">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -74,6 +74,14 @@
       color: #ffffff;
     }
   </style>
+  <style>
+    .no-scrollbar::-webkit-scrollbar{display:none}.no-scrollbar{scrollbar-width:none}
+    .tab-btn{display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap;padding:.55rem .8rem;color:#8E96A8;border-bottom:2px solid transparent;font-weight:500;transition:color .15s,border-color .15s}
+    .tab-btn:hover{color:#fff}
+    .tab-btn.active{color:#E5A93C;border-bottom-color:#E5A93C;font-weight:700}
+    .tab-btn i{font-size:.8rem}
+    .calc-num::-webkit-outer-spin-button,.calc-num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}.calc-num{-moz-appearance:textfield}
+  </style>
 </head>
 <body class="min-h-screen pb-20">
 
@@ -117,9 +125,21 @@
         </button>
       </div>
     </div>
+    <!-- 分頁列 -->
+    <nav id="tabBar" class="border-t border-[#323846]/70 bg-[#161920]/80">
+      <div class="max-w-7xl mx-auto px-2 sm:px-4 flex gap-1 overflow-x-auto no-scrollbar text-sm">
+        <button data-tab="tracker" onclick="switchTab('tracker')" class="tab-btn"><i class="fa-solid fa-users"></i><span>角色週常</span></button>
+        <button data-tab="cooking" onclick="switchTab('cooking')" class="tab-btn"><i class="fa-solid fa-utensils"></i><span>料理</span></button>
+        <button data-tab="craft" onclick="switchTab('craft')" class="tab-btn"><i class="fa-solid fa-industry"></i><span>加工計算</span></button>
+        <button data-tab="potion" onclick="switchTab('potion')" class="tab-btn"><i class="fa-solid fa-flask"></i><span>藥品計算</span></button>
+        <button data-tab="barter" onclick="switchTab('barter')" class="tab-btn"><i class="fa-solid fa-right-left"></i><span>以物易物</span></button>
+      </div>
+    </nav>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 mt-5">
+  <main class="max-w-7xl mx-auto px-4 mt-4">
+    <!-- ===== 分頁：角色週常 ===== -->
+    <div id="tab-tracker" data-tab-panel="tracker" class="tab-panel">
     <!-- 總進度條 -->
     <div class="bg-[#1E222B] rounded-xl p-3.5 sm:p-4 shadow border border-[#323846] mb-5 flex flex-col sm:flex-row items-center justify-between gap-3">
       <div class="w-full sm:w-2/3">
@@ -175,33 +195,9 @@
       </table>
     </div>
 
-    <!-- 下方雙欄資訊區：料理配方速查 + 待辦備忘 -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-8">
-      
-      <!-- 常用料理配方速查 (佔 5 欄) -->
-      <section class="lg:col-span-5 bg-[#1E222B] rounded-xl p-4 sm:p-5 shadow border border-[#323846] flex flex-col justify-between">
-        <div>
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-3.5 border-b border-[#323846] pb-2.5">
-            <div class="flex items-center gap-2">
-              <i class="fa-solid fa-utensils text-base text-[#E5A93C]"></i>
-              <h2 class="text-base font-bold text-white">常用料理配方速查</h2>
-            </div>
-
-            <!-- 份數計算切換按鈕 (1x / 10x / 20x / 30x) -->
-            <div class="inline-flex rounded-lg border border-[#323846] p-0.5 bg-[#12151A] text-xs">
-              <button onclick="setRecipeMultiplier(1)" id="multBtn_1" class="px-2 py-0.5 rounded font-bold bg-[#E5A93C] text-[#161920] transition">1份</button>
-              <button onclick="setRecipeMultiplier(10)" id="multBtn_10" class="px-2 py-0.5 rounded font-medium text-[#8E96A8] hover:text-white transition">10份</button>
-              <button onclick="setRecipeMultiplier(20)" id="multBtn_20" class="px-2 py-0.5 rounded font-medium text-[#8E96A8] hover:text-white transition">20份</button>
-              <button onclick="setRecipeMultiplier(30)" id="multBtn_30" class="px-2 py-0.5 rounded font-medium text-[#8E96A8] hover:text-white transition">30份</button>
-            </div>
-          </div>
-
-          <div id="recipeListContainer" class="space-y-3"></div>
-        </div>
-      </section>
-
+    <div class="mt-6">
       <!-- 待辦備忘區塊 (佔 7 欄) -->
-      <section class="lg:col-span-7 bg-[#1E222B] rounded-xl p-4 sm:p-5 shadow border border-[#323846]">
+      <section id="todoSection" class="bg-[#1E222B] rounded-xl p-4 sm:p-5 shadow border border-[#323846]">
         <div class="flex items-center justify-between gap-3 mb-3.5 border-b border-[#323846] pb-2.5">
           <div class="flex items-center gap-2">
             <i class="fa-solid fa-clipboard-list text-base text-[#E5A93C]"></i>
@@ -232,9 +228,93 @@
       </section>
 
     </div>
+    </div>
 
-    <!-- ===== S0 以物易物攻略（新增） ===== -->
-    <section id="barterGuide" class="mt-8 space-y-4">
+    <!-- ===== 分頁：料理 ===== -->
+    <div id="tab-cooking" data-tab-panel="cooking" class="tab-panel hidden">
+    <div class="space-y-6">
+      <!-- 常用料理配方速查 (佔 5 欄) -->
+      <section id="recipeLookup" class="bg-[#1E222B] rounded-xl p-4 sm:p-5 shadow border border-[#323846] flex flex-col justify-between">
+        <div>
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3.5 border-b border-[#323846] pb-2.5">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-utensils text-base text-[#E5A93C]"></i>
+              <h2 class="text-base font-bold text-white">常用料理配方速查</h2>
+            </div>
+
+            <!-- 份數計算切換按鈕 (1x / 10x / 20x / 30x) -->
+            <div class="inline-flex rounded-lg border border-[#323846] p-0.5 bg-[#12151A] text-xs">
+              <button onclick="setRecipeMultiplier(1)" id="multBtn_1" class="px-2 py-0.5 rounded font-bold bg-[#E5A93C] text-[#161920] transition">1份</button>
+              <button onclick="setRecipeMultiplier(10)" id="multBtn_10" class="px-2 py-0.5 rounded font-medium text-[#8E96A8] hover:text-white transition">10份</button>
+              <button onclick="setRecipeMultiplier(20)" id="multBtn_20" class="px-2 py-0.5 rounded font-medium text-[#8E96A8] hover:text-white transition">20份</button>
+              <button onclick="setRecipeMultiplier(30)" id="multBtn_30" class="px-2 py-0.5 rounded font-medium text-[#8E96A8] hover:text-white transition">30份</button>
+              <button onclick="setRecipeMultiplier(50)" id="multBtn_50" class="px-2 py-0.5 rounded font-medium text-[#8E96A8] hover:text-white transition">50份</button>
+              <button onclick="setRecipeMultiplier(70)" id="multBtn_70" class="px-2 py-0.5 rounded font-medium text-[#8E96A8] hover:text-white transition">70份</button>
+              <input id="multCustom" type="number" min="1" max="999" placeholder="自訂" title="自訂份數" oninput="const v=parseInt(this.value,10); if(v>0) setRecipeMultiplier(Math.min(v,999), true)" class="w-12 ml-0.5 bg-[#1E222B] border border-[#323846] rounded px-1 py-0.5 text-xs text-white text-center focus:outline-none focus:border-[#E5A93C] placeholder-[#8E96A8]/60">
+            </div>
+          </div>
+
+          <div id="recipeListContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+        </div>
+      </section>
+
+    <section id="weeklyCooking" class="space-y-3">
+      <div class="flex items-center gap-2 border-b border-[#323846] pb-2.5">
+        <div class="w-8 h-8 rounded-lg bg-[#E5A93C]/15 border border-[#E5A93C]/40 flex items-center justify-center text-[#E5A93C]"><i class="fa-solid fa-utensils"></i></div>
+        <h2 class="text-lg font-bold text-white">角色每週料理交換規劃</h2>
+      </div>
+<details open class="group bg-[#1E222B] rounded-xl p-3 sm:p-4 shadow border border-[#323846]">
+<summary class="cursor-pointer list-none flex items-center justify-between gap-2 border-b border-[#323846] pb-2 mb-3"><div class="flex items-center gap-2"><i class="fa-solid fa-bowl-food text-base text-[#E5A93C]"></i><h3 class="text-base font-bold text-white">1. 料理製作與交換</h3></div><i class="fa-solid fa-chevron-down text-xs text-[#8E96A8] transition group-open:rotate-180"></i></summary>
+<div><p class="text-xs text-[#8E96A8] mb-1 sm:hidden"><i class="fa-solid fa-arrows-left-right"></i> 表格可左右滑動</p><div class="overflow-x-auto rounded-lg border border-[#323846]"><table class="w-full text-xs sm:text-sm text-left min-w-[640px]"><thead><tr class="bg-[#262B36] text-gray-200 text-xs border-b border-[#323846]"><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">料理</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">每週製作<br>(6角色合計)</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">產出</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">交換規則<br>(每名角色)</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">6角色每週<br>交換合計</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">交換獎勵<br>(每次)</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">6角色每週<br>可獲得總量</th></tr></thead><tbody><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">奶油醬牛排</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">42 次</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">42 份</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">每日 1 次 (1 份)</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">42 次</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">高級絲綢 ×4</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">高級絲綢 ×168</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">蘋果鮮奶油蛋糕</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">29 次</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">29 份</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">每日 1 次 (1 份)</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">29 次</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">高級布料+ ×4</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">高級布料+ ×116</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">沙威瑪</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">72 次</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">72 份</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">每日 3 次 (1 份)</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">72 次</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">卓越繃帶 ×5</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">卓越繃帶 ×360</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">鱸魚辣魚湯</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">6 次</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">6 份</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">每週 1 次 (1 份)</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">6 次</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">銀合金錠 ×10</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">銀合金錠 ×60</td></tr></tbody></table></div></div></details>
+<details open class="group bg-[#1E222B] rounded-xl p-3 sm:p-4 shadow border border-[#323846]">
+<summary class="cursor-pointer list-none flex items-center justify-between gap-2 border-b border-[#323846] pb-2 mb-3"><div class="flex items-center gap-2"><i class="fa-solid fa-gears text-base text-[#E5A93C]"></i><h3 class="text-base font-bold text-white">2. 原料與加工</h3></div><i class="fa-solid fa-chevron-down text-xs text-[#8E96A8] transition group-open:rotate-180"></i></summary>
+<div class="space-y-3"><div class="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start"><div><h4 class="text-sm font-bold text-[#E5A93C] mb-1.5">加工需求</h4><div class="overflow-x-auto rounded-lg border border-[#323846]"><table class="w-full text-xs sm:text-sm text-left"><thead><tr class="bg-[#262B36] text-gray-200 text-xs border-b border-[#323846]"><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">加工品</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">總需求</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">既有來源</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">本週加工</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">產出</th></tr></thead><tbody><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">鮮奶油</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">142</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">48 次 ➔ 144 份</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">144</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">麵粉</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">332</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">愛麗沙交換<br>6角色每週共 84</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">33 次 ➔ 249 份<br>(尚缺 248)</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">249</td></tr></tbody></table></div></div><div><h4 class="text-sm font-bold text-[#E5A93C] mb-1.5">加工所需原料</h4><div class="overflow-x-auto rounded-lg border border-[#323846]"><table class="w-full text-xs sm:text-sm text-left"><thead><tr class="bg-[#262B36] text-gray-200 text-xs border-b border-[#323846]"><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">原料</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">需求量</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">用途</th></tr></thead><tbody><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">牛奶</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">576</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">加工鮮奶油 (48 次)</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">雞蛋</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">414</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">加工鮮奶油 (288)<br>+ 愛麗沙交換 (126)</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">糖</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">96</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">加工鮮奶油 (48 次)</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">小麥</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">1,245</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">加工麵粉 (83 次)</td></tr></tbody></table></div></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-start"><div class="rounded-lg bg-[#161920] border border-[#323846] p-2.5"><h4 class="text-sm font-bold text-[#E5A93C] mb-1.5">提爾克那 - 愛麗沙（95m）</h4><div class="grid grid-cols-2 gap-2 text-xs sm:text-sm"><div class="text-gray-300 space-y-1"><p>薰衣草花 ×1 ➔ 麵粉 ×1<br><span class="text-[#8E96A8] text-xs">（每名角色 每日 1 次）</span></p><p>雞蛋 ×3 ➔ 麵粉 ×1<br><span class="text-[#8E96A8] text-xs">（每名角色 每日 1 次）</span></p></div><div class="text-gray-300 border-l border-[#323846] pl-2"><div class="text-[#8E96A8] text-xs mb-0.5">6 角色每週合計</div>薰衣草花 ×42<br>雞蛋 ×126<br>➔ 麵粉 ×84</div></div></div><div class="rounded-lg bg-[#161920] border border-[#323846] p-2.5"><h4 class="text-sm font-bold text-[#E5A93C] mb-1.5">班克爾 - 珍妮佛（70m）</h4><div class="grid grid-cols-2 gap-2 text-xs sm:text-sm"><div class="text-gray-300 space-y-1"><p>黃豆 ×10 ➔ 清淡的肉 ×15<br><span class="text-[#8E96A8] text-xs">（每名角色 每日 1 次）</span></p></div><div class="text-gray-300 border-l border-[#323846] pl-2"><div class="text-[#8E96A8] text-xs mb-0.5">6 角色每週合計</div>黃豆 ×420<br>➔ 清淡的肉 ×630<br><span class="text-[#8E96A8] text-xs">(含珍妮佛交換 420)</span></div></div></div></div></div></details>
+<details open class="group bg-[#1E222B] rounded-xl p-3 sm:p-4 shadow border border-[#323846]">
+<summary class="cursor-pointer list-none flex items-center justify-between gap-2 border-b border-[#323846] pb-2 mb-3"><div class="flex items-center gap-2"><i class="fa-solid fa-basket-shopping text-base text-[#E5A93C]"></i><h3 class="text-base font-bold text-white">3. 每週備料與成本</h3></div><i class="fa-solid fa-chevron-down text-xs text-[#8E96A8] transition group-open:rotate-180"></i></summary>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 items-start"><div><h4 class="text-sm font-bold text-[#E5A93C] mb-1.5">商店／限購食材</h4><div class="overflow-x-auto rounded-lg border border-[#323846]"><table class="w-full text-xs sm:text-sm text-left"><thead><tr class="bg-[#262B36] text-gray-200 text-xs border-b border-[#323846]"><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">食材</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">數量</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">備註</th></tr></thead><tbody><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">糖</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">357</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">高麗菜</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">360</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">大蒜</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">84</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">胡椒</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">138</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">檸檬</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">144</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">白蘿蔔</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">24</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">辣椒粉</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">24</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr></tbody></table></div></div><div><h4 class="text-sm font-bold text-[#E5A93C] mb-1.5">採集／狩獵／釣魚食材</h4><div class="overflow-x-auto rounded-lg border border-[#323846]"><table class="w-full text-xs sm:text-sm text-left"><thead><tr class="bg-[#262B36] text-gray-200 text-xs border-b border-[#323846]"><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">食材</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">數量</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">備註</th></tr></thead><tbody><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">肉</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">420</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">清淡的肉</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">90</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">黃豆</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">1,284</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">含珍妮佛交換 420</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">雞蛋</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">414</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">含愛麗沙交換 126</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">牛奶</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">576</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">小麥</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">1,245</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">蘋果</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">348</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">洋蔥</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">36</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">鱸魚</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">36</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">裝水的瓶子</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">30</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">薰衣草花</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">42</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">愛麗沙交換</td></tr></tbody></table></div></div><div class="space-y-3"><div><h4 class="text-sm font-bold text-[#E5A93C] mb-1.5">消耗品</h4><div class="overflow-x-auto rounded-lg border border-[#323846]"><table class="w-full text-xs sm:text-sm text-left"><thead><tr class="bg-[#262B36] text-gray-200 text-xs border-b border-[#323846]"><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">道具</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">數量</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">備註</th></tr></thead><tbody><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">空瓶</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">303</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">牛奶 576 ÷ 2 = 288<br>裝水的瓶子 30 ÷ 2 = 15</td></tr></tbody></table></div></div><div><div><h4 class="text-sm font-bold text-[#E5A93C] mb-1.5">固定採購成本（商店／限購食材）</h4><div class="overflow-x-auto rounded-lg border border-[#323846]"><table class="w-full text-xs sm:text-sm text-left"><thead><tr class="bg-[#262B36] text-gray-200 text-xs border-b border-[#323846]"><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">食材</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">數量</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">單價</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">金額</th></tr></thead><tbody><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">糖</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">357</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">1,200</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">428,400</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">高麗菜</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">360</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">800</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">288,000</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">大蒜</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">84</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">1,200</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">100,800</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">胡椒</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">138</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">2,000</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">276,000</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">檸檬</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">144</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">3,000</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">432,000</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">白蘿蔔</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">24</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">10,000</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">240,000</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">辣椒粉</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">24</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">3,000</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">72,000</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">空瓶</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">303</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">50</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">15,150</td></tr></tbody></table></div></div><div class="mt-2 flex items-center justify-between rounded-lg bg-[#E5A93C]/10 border border-[#E5A93C]/50 px-3 py-2"><span class="text-sm font-bold text-white">每週固定成本合計</span><span class="text-lg font-bold text-[#E5A93C]">1,852,350 金幣</span></div></div></div></div></details>
+    </section>
+    </div>
+    </div>
+
+    <!-- ===== 分頁：加工計算 ===== -->
+    <div id="tab-craft" data-tab-panel="craft" class="tab-panel hidden">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#323846] pb-2.5 mb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-[#E5A93C]/15 border border-[#E5A93C]/40 flex items-center justify-center text-[#E5A93C]"><i class="fa-solid fa-industry"></i></div>
+          <div><h2 class="text-lg font-bold text-white">常用加工計算機</h2><p class="text-xs text-[#8E96A8]">輸入製作次數（每次產出數量見卡片右上），自動計算材料與加工時間</p></div>
+        </div>
+        <div class="flex items-center gap-2 text-xs">
+          <label class="inline-flex items-center gap-1.5 cursor-pointer select-none bg-[#12151A] border border-[#323846] rounded-lg px-2.5 py-1.5 text-gray-300 hover:border-[#E5A93C]/60" title="勾選後，配方中可在本頁製作的中間材料會換算成需要的製作次數（無條件進位），並把它們的原料併入總材料需求">
+            <input type="checkbox" id="calcExpand_craft" onchange="setCalcExpand('craft', this.checked)" class="accent-[#E5A93C]"> 展開前置材料
+          </label>
+          <button onclick="clearCalc('craft')" class="bg-[#12151A] border border-[#323846] rounded-lg px-2.5 py-1.5 text-[#8E96A8] hover:text-white hover:border-[#E5A93C]/60"><i class="fa-solid fa-eraser mr-1"></i>全部清除</button>
+        </div>
+      </div>
+      <div id="calcGrid_craft" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+      <div id="calcSummary_craft" class="mt-4"></div>
+    </div>
+
+    <!-- ===== 分頁：藥品計算 ===== -->
+    <div id="tab-potion" data-tab-panel="potion" class="tab-panel hidden">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#323846] pb-2.5 mb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-[#E5A93C]/15 border border-[#E5A93C]/40 flex items-center justify-center text-[#E5A93C]"><i class="fa-solid fa-flask"></i></div>
+          <div><h2 class="text-lg font-bold text-white">常用藥品製作計算區</h2><p class="text-xs text-[#8E96A8]">藥品製作台・藥水調製｜輸入製作次數，自動計算材料</p></div>
+        </div>
+        <div class="flex items-center gap-2 text-xs">
+          <label class="inline-flex items-center gap-1.5 cursor-pointer select-none bg-[#12151A] border border-[#323846] rounded-lg px-2.5 py-1.5 text-gray-300 hover:border-[#E5A93C]/60" title="勾選後，配方中可在本頁製作的中間材料會換算成需要的製作次數（無條件進位），並把它們的原料併入總材料需求">
+            <input type="checkbox" id="calcExpand_potion" onchange="setCalcExpand('potion', this.checked)" class="accent-[#E5A93C]"> 展開前置材料
+          </label>
+          <button onclick="clearCalc('potion')" class="bg-[#12151A] border border-[#323846] rounded-lg px-2.5 py-1.5 text-[#8E96A8] hover:text-white hover:border-[#E5A93C]/60"><i class="fa-solid fa-eraser mr-1"></i>全部清除</button>
+        </div>
+      </div>
+      <div id="calcGrid_potion" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+      <div id="calcSummary_potion" class="mt-4"></div>
+    </div>
+
+    <!-- ===== 分頁：以物易物 ===== -->
+    <div id="tab-barter" data-tab-panel="barter" class="tab-panel hidden">
+    <section id="barterGuide" class="space-y-4">
       <div class="flex items-center gap-2 border-b border-[#323846] pb-2.5">
         <div class="w-8 h-8 rounded-lg bg-[#E5A93C]/15 border border-[#E5A93C]/40 flex items-center justify-center text-[#E5A93C]"><i class="fa-solid fa-right-left"></i></div>
         <h2 class="text-lg font-bold text-white">S0 最高價值以物易物材料清單</h2>
@@ -255,21 +335,7 @@
 <summary class="cursor-pointer list-none flex items-center justify-between gap-2 border-b border-[#323846] pb-2.5 mb-3.5"><div class="flex items-center gap-2"><i class="fa-solid fa-lightbulb text-base text-[#E5A93C]"></i><div><h3 class="text-base font-bold text-white">💡 多角色（分身）協作小撇步</h3></div></div><i class="fa-solid fa-chevron-down text-xs text-[#8E96A8] transition group-open:rotate-180"></i></summary>
 <ul class="space-y-1.5 text-sm text-gray-300"><li class="flex gap-2"><i class="fa-solid fa-angle-right text-[#E5A93C] text-xs mt-1.5"></i><span><b class="text-white">角色等級門檻：</b>分身練至 <b class="text-[#E5A93C]">35 等</b> 即可解鎖上述完整兌換清單。</span></li><li class="flex gap-2"><i class="fa-solid fa-angle-right text-[#E5A93C] text-xs mt-1.5"></i><span><b class="text-white">倉庫集中流：</b>主號掛機採集「原木、銅礦石」並統一在料理台做好「炒蔬菜」，全部丟入公用保管箱。分身上線只需負責「領材料 ➔ 跑完上述 3 城鎮 ➔ 把換到的特殊鋼錠、高級生皮存回公用保管箱」即可，單隻分身跑完一輪僅需約 3 分鐘。</span></li></ul></details>
     </section>
-    <section id="weeklyCooking" class="mt-8 space-y-3">
-      <div class="flex items-center gap-2 border-b border-[#323846] pb-2.5">
-        <div class="w-8 h-8 rounded-lg bg-[#E5A93C]/15 border border-[#E5A93C]/40 flex items-center justify-center text-[#E5A93C]"><i class="fa-solid fa-utensils"></i></div>
-        <h2 class="text-lg font-bold text-white">角色每週料理交換規劃</h2>
-      </div>
-<details open class="group bg-[#1E222B] rounded-xl p-3 sm:p-4 shadow border border-[#323846]">
-<summary class="cursor-pointer list-none flex items-center justify-between gap-2 border-b border-[#323846] pb-2 mb-3"><div class="flex items-center gap-2"><i class="fa-solid fa-bowl-food text-base text-[#E5A93C]"></i><h3 class="text-base font-bold text-white">1. 料理製作與交換</h3></div><i class="fa-solid fa-chevron-down text-xs text-[#8E96A8] transition group-open:rotate-180"></i></summary>
-<div><p class="text-xs text-[#8E96A8] mb-1 sm:hidden"><i class="fa-solid fa-arrows-left-right"></i> 表格可左右滑動</p><div class="overflow-x-auto rounded-lg border border-[#323846]"><table class="w-full text-xs sm:text-sm text-left min-w-[640px]"><thead><tr class="bg-[#262B36] text-gray-200 text-xs border-b border-[#323846]"><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">料理</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">每週製作<br>(6角色合計)</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">產出</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">交換規則<br>(每名角色)</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">6角色每週<br>交換合計</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">交換獎勵<br>(每次)</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">6角色每週<br>可獲得總量</th></tr></thead><tbody><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">奶油醬牛排</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">42 次</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">42 份</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">每日 1 次 (1 份)</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">42 次</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">高級絲綢 ×4</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">高級絲綢 ×168</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">蘋果鮮奶油蛋糕</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">29 次</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">29 份</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">每日 1 次 (1 份)</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">29 次</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">高級布料+ ×4</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">高級布料+ ×116</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">沙威瑪</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">72 次</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">72 份</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">每日 3 次 (1 份)</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">72 次</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">卓越繃帶 ×5</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">卓越繃帶 ×360</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">鱸魚辣魚湯</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">6 次</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">6 份</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">每週 1 次 (1 份)</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">6 次</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">銀合金錠 ×10</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">銀合金錠 ×60</td></tr></tbody></table></div></div></details>
-<details open class="group bg-[#1E222B] rounded-xl p-3 sm:p-4 shadow border border-[#323846]">
-<summary class="cursor-pointer list-none flex items-center justify-between gap-2 border-b border-[#323846] pb-2 mb-3"><div class="flex items-center gap-2"><i class="fa-solid fa-gears text-base text-[#E5A93C]"></i><h3 class="text-base font-bold text-white">2. 原料與加工</h3></div><i class="fa-solid fa-chevron-down text-xs text-[#8E96A8] transition group-open:rotate-180"></i></summary>
-<div class="space-y-3"><div class="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start"><div><h4 class="text-sm font-bold text-[#E5A93C] mb-1.5">加工需求</h4><div class="overflow-x-auto rounded-lg border border-[#323846]"><table class="w-full text-xs sm:text-sm text-left"><thead><tr class="bg-[#262B36] text-gray-200 text-xs border-b border-[#323846]"><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">加工品</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">總需求</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">既有來源</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">本週加工</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">產出</th></tr></thead><tbody><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">鮮奶油</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">142</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">48 次 ➔ 144 份</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">144</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">麵粉</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">332</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">愛麗沙交換<br>6角色每週共 84</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">33 次 ➔ 249 份<br>(尚缺 248)</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">249</td></tr></tbody></table></div></div><div><h4 class="text-sm font-bold text-[#E5A93C] mb-1.5">加工所需原料</h4><div class="overflow-x-auto rounded-lg border border-[#323846]"><table class="w-full text-xs sm:text-sm text-left"><thead><tr class="bg-[#262B36] text-gray-200 text-xs border-b border-[#323846]"><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">原料</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">需求量</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">用途</th></tr></thead><tbody><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">牛奶</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">576</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">加工鮮奶油 (48 次)</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">雞蛋</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">414</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">加工鮮奶油 (288)<br>+ 愛麗沙交換 (126)</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">糖</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">96</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">加工鮮奶油 (48 次)</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">小麥</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">1,245</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">加工麵粉 (83 次)</td></tr></tbody></table></div></div></div><div class="grid grid-cols-1 md:grid-cols-2 gap-3 items-start"><div class="rounded-lg bg-[#161920] border border-[#323846] p-2.5"><h4 class="text-sm font-bold text-[#E5A93C] mb-1.5">提爾克那 - 愛麗沙（95m）</h4><div class="grid grid-cols-2 gap-2 text-xs sm:text-sm"><div class="text-gray-300 space-y-1"><p>薰衣草花 ×1 ➔ 麵粉 ×1<br><span class="text-[#8E96A8] text-xs">（每名角色 每日 1 次）</span></p><p>雞蛋 ×3 ➔ 麵粉 ×1<br><span class="text-[#8E96A8] text-xs">（每名角色 每日 1 次）</span></p></div><div class="text-gray-300 border-l border-[#323846] pl-2"><div class="text-[#8E96A8] text-xs mb-0.5">6 角色每週合計</div>薰衣草花 ×42<br>雞蛋 ×126<br>➔ 麵粉 ×84</div></div></div><div class="rounded-lg bg-[#161920] border border-[#323846] p-2.5"><h4 class="text-sm font-bold text-[#E5A93C] mb-1.5">班克爾 - 珍妮佛（70m）</h4><div class="grid grid-cols-2 gap-2 text-xs sm:text-sm"><div class="text-gray-300 space-y-1"><p>黃豆 ×10 ➔ 清淡的肉 ×15<br><span class="text-[#8E96A8] text-xs">（每名角色 每日 1 次）</span></p></div><div class="text-gray-300 border-l border-[#323846] pl-2"><div class="text-[#8E96A8] text-xs mb-0.5">6 角色每週合計</div>黃豆 ×420<br>➔ 清淡的肉 ×630<br><span class="text-[#8E96A8] text-xs">(含珍妮佛交換 420)</span></div></div></div></div></div></details>
-<details open class="group bg-[#1E222B] rounded-xl p-3 sm:p-4 shadow border border-[#323846]">
-<summary class="cursor-pointer list-none flex items-center justify-between gap-2 border-b border-[#323846] pb-2 mb-3"><div class="flex items-center gap-2"><i class="fa-solid fa-basket-shopping text-base text-[#E5A93C]"></i><h3 class="text-base font-bold text-white">3. 每週備料與成本</h3></div><i class="fa-solid fa-chevron-down text-xs text-[#8E96A8] transition group-open:rotate-180"></i></summary>
-<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 items-start"><div><h4 class="text-sm font-bold text-[#E5A93C] mb-1.5">商店／限購食材</h4><div class="overflow-x-auto rounded-lg border border-[#323846]"><table class="w-full text-xs sm:text-sm text-left"><thead><tr class="bg-[#262B36] text-gray-200 text-xs border-b border-[#323846]"><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">食材</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">數量</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">備註</th></tr></thead><tbody><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">糖</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">357</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">高麗菜</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">360</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">大蒜</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">84</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">胡椒</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">138</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">檸檬</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">144</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">白蘿蔔</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">24</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">辣椒粉</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">24</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr></tbody></table></div></div><div><h4 class="text-sm font-bold text-[#E5A93C] mb-1.5">採集／狩獵／釣魚食材</h4><div class="overflow-x-auto rounded-lg border border-[#323846]"><table class="w-full text-xs sm:text-sm text-left"><thead><tr class="bg-[#262B36] text-gray-200 text-xs border-b border-[#323846]"><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">食材</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">數量</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">備註</th></tr></thead><tbody><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">肉</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">420</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">清淡的肉</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">90</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">黃豆</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">1,284</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">含珍妮佛交換 420</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">雞蛋</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">414</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">含愛麗沙交換 126</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">牛奶</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">576</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">小麥</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">1,245</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">蘋果</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">348</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">洋蔥</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">36</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">鱸魚</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">36</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">裝水的瓶子</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">30</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">-</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">薰衣草花</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">42</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">愛麗沙交換</td></tr></tbody></table></div></div><div class="space-y-3"><div><h4 class="text-sm font-bold text-[#E5A93C] mb-1.5">消耗品</h4><div class="overflow-x-auto rounded-lg border border-[#323846]"><table class="w-full text-xs sm:text-sm text-left"><thead><tr class="bg-[#262B36] text-gray-200 text-xs border-b border-[#323846]"><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">道具</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">數量</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">備註</th></tr></thead><tbody><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">空瓶</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">303</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300">牛奶 576 ÷ 2 = 288<br>裝水的瓶子 30 ÷ 2 = 15</td></tr></tbody></table></div></div><div><div><h4 class="text-sm font-bold text-[#E5A93C] mb-1.5">固定採購成本（商店／限購食材）</h4><div class="overflow-x-auto rounded-lg border border-[#323846]"><table class="w-full text-xs sm:text-sm text-left"><thead><tr class="bg-[#262B36] text-gray-200 text-xs border-b border-[#323846]"><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">食材</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">數量</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">單價</th><th class="px-1.5 sm:px-2 py-1.5 font-semibold whitespace-nowrap">金額</th></tr></thead><tbody><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">糖</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">357</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">1,200</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">428,400</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">高麗菜</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">360</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">800</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">288,000</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">大蒜</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">84</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">1,200</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">100,800</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">胡椒</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">138</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">2,000</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">276,000</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">檸檬</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">144</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">3,000</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">432,000</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">白蘿蔔</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">24</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">10,000</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">240,000</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">辣椒粉</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">24</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">3,000</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">72,000</td></tr><tr class="bg-[#161920] hover:bg-[#1B1F28] transition"><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] font-bold text-[#E5A93C] whitespace-nowrap">空瓶</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">303</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">50</td><td class="px-1.5 sm:px-2 py-1.5 align-top border-b border-[#323846] text-gray-300 whitespace-nowrap">15,150</td></tr></tbody></table></div></div><div class="mt-2 flex items-center justify-between rounded-lg bg-[#E5A93C]/10 border border-[#E5A93C]/50 px-3 py-2"><span class="text-sm font-bold text-white">每週固定成本合計</span><span class="text-lg font-bold text-[#E5A93C]">1,852,350 金幣</span></div></div></div></div></details>
-    </section>
+    </div>
   </main>
 
   <!-- 新增角色彈窗 -->
@@ -439,6 +505,16 @@
           { item: "辣椒粉", count: 4 },
           { item: "胡椒", count: 2 }
         ]
+      },
+      {
+        name: "🥗 炒蔬菜",
+        meta: "技巧 & 幸運｜台Lv.2 / 料Lv.5",
+        ingredients: [
+          { item: "馬鈴薯", count: 8 },
+          { item: "洋蔥", count: 3 },
+          { item: "高麗菜", count: 6 },
+          { item: "藥草", count: 2 }
+        ]
       }
     ];
 
@@ -493,11 +569,13 @@
     let todos = JSON.parse(localStorage.getItem('mabi_todos')) || getDefaultTodos();
     let currentView = localStorage.getItem('mabi_view') || 'card';
 
-    function setRecipeMultiplier(mult) {
+    function setRecipeMultiplier(mult, fromCustom) {
       currentMultiplier = mult;
-      [1, 10, 20, 30].forEach(m => {
+      const custom = document.getElementById('multCustom');
+      if (custom && !fromCustom) custom.value = '';
+      [1, 10, 20, 30, 50, 70].forEach(m => {
         const btn = document.getElementById(`multBtn_${m}`);
-        if (m === mult) {
+        if (m === mult && !fromCustom) {
           btn.className = "px-2 py-0.5 rounded font-bold bg-[#E5A93C] text-[#161920] transition";
         } else {
           btn.className = "px-2 py-0.5 rounded font-medium text-[#8E96A8] hover:text-white transition";
@@ -1123,10 +1201,236 @@
       document.getElementById('overallProgressBar').style.width = `${totalPct}%`;
     }
 
+    // ===== 加工／藥品計算機 =====
+    const CALCS = {
+      craft: {
+        storageKey: 'mabi_calc_craft',
+        recipes: [
+          { id: 'alloy', name: '合金鋼錠', yield: 3, station: '金屬加工設備 Lv.2', time: 4800, mats: [['鋼錠', 3], ['銅礦石', 15], ['煤炭', 8]] },
+          { id: 'special', name: '特殊鋼錠', yield: 3, station: '金屬加工設備 Lv.3', time: 14400, mats: [['合金鋼錠', 4], ['白銅礦石', 20], ['煤炭', 12]] },
+          { id: 'tar', name: '焦油', yield: 5, station: '金屬加工設備 Lv.2', time: 5400, mats: [['原木', 50], ['黏土', 25]] },
+          { id: 'finewood', name: '高級木材', yield: 3, station: '木材加工設備 Lv.2', time: 4800, mats: [['木材+', 3], ['高級原木', 15], ['樹液', 8]] },
+          { id: 'softwood', name: '柔軟木材', yield: 3, station: '木材加工設備 Lv.3', time: 12600, mats: [['高級木材+', 15], ['柔軟原木', 30], ['樹液', 30]] },
+          { id: 'hardwood', name: '堅硬木材', yield: 3, station: '木材加工設備 Lv.3', time: 12600, mats: [['高級木材+', 15], ['堅硬原木', 30], ['樹液', 30]] },
+          { id: 'leather', name: '高級皮革', yield: 3, station: '皮革加工設備 Lv.2', time: 4800, mats: [['皮革+', 3], ['高級生皮', 15], ['單寧粉末', 8]] },
+          { id: 'leatherp', name: '高級皮革+', yield: 3, station: '皮革加工設備 Lv.3', time: 14400, mats: [['高級皮革', 4], ['高級生皮+', 20], ['單寧粉末', 12]] },
+          { id: 'cloth', name: '高級布料', yield: 3, station: '布料加工設備 Lv.2', time: 4800, mats: [['布料+', 3], ['高級羊毛', 15], ['羊毛', 8]] },
+          { id: 'clothp', name: '高級布料+', yield: 3, station: '布料加工設備 Lv.3', time: 14400, mats: [['高級布料', 4], ['高級羊毛+', 20], ['羊毛', 12]] },
+          { id: 'rope', name: '繩索', yield: 3, station: '布料加工設備 Lv.3', time: 3150, mats: [['植物纖維', 45], ['蜂蠟', 4]] },
+          { id: 'strongrope', name: '結實的繩索', yield: 3, station: '布料加工設備 Lv.4', time: 9000, mats: [['繩索', 6], ['植物纖維', 90], ['蜂蠟', 8], ['焦油', 3]] }
+        ]
+      },
+      potion: {
+        storageKey: 'mabi_calc_potion',
+        recipes: [
+          { id: 'smash', name: '強擊強化秘藥', yield: 3, station: '藥品製作台 Lv.3', skill: '藥水調製 Lv.16', effect: '強擊強化 +220', mats: [['血紅藥草', 10], ['淨淨蘑菇汁液', 3], ['獨角仙', 10], ['鍊金術碎屑', 10]] },
+          { id: 'combo', name: '連擊強化秘藥', yield: 3, station: '藥品製作台 Lv.3', skill: '藥水調製 Lv.16', effect: '連擊強化 +220', mats: [['箭花', 10], ['淨淨蘑菇汁液', 3], ['滴答螢火蟲', 10], ['鍊金術碎屑', 10]] },
+          { id: 'mix', name: '混合強化秘藥(山崩)', yield: 2, station: '藥品製作台 Lv.3', skill: '藥水調製 Lv.21', effect: '強擊、連擊強化 +200', mats: [['強擊強化秘藥', 3], ['連擊強化秘藥', 3], ['強化秘藥乳化劑', 6], ['生命的魔力石', 10], ['憤怒的碎片', 20]] },
+          { id: 'hsmash', name: '高級強擊強化秘藥', yield: 3, station: '藥品製作台 Lv.4', skill: '藥水調製 Lv.22', effect: '強擊強化 +300', mats: [['強擊強化秘藥', 5], ['增幅蘑菇汁液', 5], ['礦山的魔力石', 6], ['鍊金術碎屑', 20]] },
+          { id: 'hcombo', name: '高級連擊強化秘藥', yield: 3, station: '藥品製作台 Lv.4', skill: '藥水調製 Lv.22', effect: '連擊強化 +300', mats: [['連擊強化秘藥', 5], ['增幅蘑菇汁液', 5], ['礦山的魔力石', 6], ['鍊金術碎屑', 20]] },
+          { id: 'hmix', name: '高級混合強化秘藥(山崩)', yield: 2, station: '藥品製作台 Lv.4', skill: '藥水調製 Lv.24', effect: '強擊、連擊強化 +280', mats: [['高級強擊強化秘藥', 3], ['高級連擊強化秘藥', 3], ['強化秘藥乳化劑', 10], ['生命的魔力石', 25], ['憤怒的碎片', 60]] }
+        ]
+      }
+    };
+    const calcState = {};
+    Object.keys(CALCS).forEach(k => {
+      let st = {};
+      try { st = JSON.parse(localStorage.getItem(CALCS[k].storageKey)) || {}; } catch (e) { st = {}; }
+      calcState[k] = { counts: st.counts || {}, expand: Boolean(st.expand) };
+    });
+    function saveCalc(k) { localStorage.setItem(CALCS[k].storageKey, JSON.stringify(calcState[k])); }
+
+    function fmtDuration(sec) {
+      if (!sec) return '0分';
+      const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+      return (h ? h + '小時' : '') + (m ? m + '分' : '') + (s ? s + '秒' : '');
+    }
+    const fmtN = n => n.toLocaleString('en-US');
+
+    // 依「中間材料」深度排序：越上游（用到越多可製作品）越先展開
+    function calcDepth(k, name, seen = {}) {
+      const r = CALCS[k].recipes.find(x => x.name === name);
+      if (!r) return 0;
+      if (seen[name] !== undefined) return seen[name];
+      seen[name] = 0;
+      const d = 1 + Math.max(0, ...r.mats.map(([m]) => calcDepth(k, m, seen)));
+      seen[name] = d;
+      return d;
+    }
+
+    function computeCalc(k) {
+      const defs = CALCS[k].recipes, st = calcState[k];
+      const need = {}, order = [];
+      const add = (item, n) => { if (!(item in need)) { need[item] = 0; order.push(item); } need[item] += n; };
+      let time = 0, any = false;
+      defs.forEach(r => {
+        const c = st.counts[r.id] || 0;
+        if (c > 0) { any = true; r.mats.forEach(([m, n]) => add(m, n * c)); time += (r.time || 0) * c; }
+      });
+      const pre = [];
+      if (st.expand) {
+        const craftable = defs.map(r => r.name).sort((a, b) => calcDepth(k, b) - calcDepth(k, a));
+        craftable.forEach(name => {
+          const q = need[name];
+          if (!q) return;
+          const r = defs.find(x => x.name === name);
+          const crafts = Math.ceil(q / r.yield);
+          pre.push({ name, need: q, crafts, made: crafts * r.yield, time: (r.time || 0) * crafts });
+          delete need[name];
+          r.mats.forEach(([m, n]) => add(m, n * crafts));
+          time += (r.time || 0) * crafts;
+        });
+      }
+      return { any, items: order.filter(i => need[i] > 0).map(i => [i, need[i]]), pre, time };
+    }
+
+    function setCalcCount(k, id, val, fromInput) {
+      let n = parseInt(val, 10);
+      if (!(n >= 0)) n = 0;
+      n = Math.min(n, 9999);
+      calcState[k].counts[id] = n;
+      saveCalc(k);
+      renderCalc(k, id, fromInput);
+    }
+    function bumpCalc(k, id, d) { setCalcCount(k, id, (calcState[k].counts[id] || 0) + d); }
+    function setCalcExpand(k, on) { calcState[k].expand = on; saveCalc(k); renderCalcSummary(k); }
+    function clearCalc(k, id) {
+      if (id) { calcState[k].counts[id] = 0; saveCalc(k); renderCalc(k, id); return; }
+      calcState[k].counts = {};
+      saveCalc(k);
+      renderCalc(k);
+    }
+
+    function calcHeadHtml(k, r) {
+      const c = calcState[k].counts[r.id] || 0;
+      return `
+          <div class="min-w-0">
+            <div class="font-bold text-sm text-gray-100">${r.name} <span class="text-[11px] font-mono text-[#8E96A8]">(每次 ×${r.yield})</span></div>
+            <div class="text-[11px] text-[#8E96A8] mt-0.5 flex flex-wrap gap-x-2.5 gap-y-0.5">
+              <span><i class="fa-solid fa-screwdriver-wrench mr-1"></i>${r.station}</span>
+              ${r.skill ? `<span><i class="fa-solid fa-flask mr-1"></i>${r.skill}</span>` : ''}
+              ${r.time ? `<span><i class="fa-regular fa-clock mr-1"></i>${fmtDuration(r.time)}／次</span>` : ''}
+            </div>
+            ${r.effect ? `<div class="text-[11px] text-[#68D391] mt-0.5">${r.effect}</div>` : ''}
+          </div>
+          <div class="text-right shrink-0">
+            <div class="text-[10px] text-[#8E96A8]">產出</div>
+            <div class="font-mono font-bold text-[#E5A93C] text-base leading-tight">${fmtN(c * r.yield)}</div>
+          </div>`;
+    }
+    function calcMatsHtml(k, r) {
+      const c = calcState[k].counts[r.id] || 0;
+      return r.mats.map(([m, n]) => `<span class="text-xs bg-[#1E222B] text-gray-200 px-2 py-0.5 rounded border border-[#323846]">${m} <strong class="text-[#E5A93C] font-mono">×${fmtN(n * (c || 1))}</strong></span>`).join('')
+        + (c ? '' : '<span class="text-[10px] text-[#8E96A8]/70 self-center">（單次用量）</span>');
+    }
+    function calcTimeHtml(k, r) {
+      const c = calcState[k].counts[r.id] || 0;
+      return r.time ? `<i class="fa-regular fa-hourglass-half mr-0.5"></i>${fmtDuration(r.time * c)}` : '';
+    }
+    function calcCardBody(k, r) {
+      const c = calcState[k].counts[r.id] || 0;
+      return `
+        <div class="flex items-start justify-between gap-2" data-part="head">${calcHeadHtml(k, r)}</div>
+        <div class="flex items-center gap-1 mt-2">
+          <span class="text-[11px] text-[#8E96A8] mr-0.5">份數</span>
+          <input type="number" min="0" max="9999" inputmode="numeric" value="${c}" data-calc-input="${k}:${r.id}" oninput="setCalcCount('${k}','${r.id}',this.value,true)" onfocus="this.select()" class="calc-num w-14 bg-[#12151A] border border-[#323846] rounded px-1.5 py-0.5 text-sm text-white text-center font-mono focus:outline-none focus:border-[#E5A93C]">
+          ${[1, 5, 10].map(d => `<button onclick="bumpCalc('${k}','${r.id}',${d})" class="text-xs px-1.5 py-0.5 rounded bg-[#262B36] border border-[#323846] text-gray-200 hover:border-[#E5A93C]/60 hover:text-[#E5A93C]">+${d}</button>`).join('')}
+          <button onclick="clearCalc('${k}','${r.id}')" title="清除" class="text-xs px-1.5 py-0.5 rounded text-[#8E96A8] hover:text-red-400"><i class="fa-solid fa-xmark"></i></button>
+          <span class="ml-auto text-[11px] text-[#8E96A8] font-mono whitespace-nowrap" title="總加工時間" data-part="time">${calcTimeHtml(k, r)}</span>
+        </div>
+        <div class="flex flex-wrap gap-1 mt-2" data-part="mats">${calcMatsHtml(k, r)}</div>`;
+    }
+
+    function renderCalc(k, onlyId, fromInput) {
+      const grid = document.getElementById('calcGrid_' + k);
+      if (!grid) return;
+      const defs = CALCS[k].recipes;
+      if (onlyId) {
+        const el = document.getElementById(`calcCard_${k}_${onlyId}`);
+        const r = defs.find(x => x.id === onlyId);
+        el.querySelector('[data-part="head"]').innerHTML = calcHeadHtml(k, r);
+        el.querySelector('[data-part="time"]').innerHTML = calcTimeHtml(k, r);
+        el.querySelector('[data-part="mats"]').innerHTML = calcMatsHtml(k, r);
+        if (!fromInput) el.querySelector('input').value = calcState[k].counts[onlyId] || 0;
+        el.className = cardClass(k, r);
+      } else {
+        grid.innerHTML = defs.map(r => `<div id="calcCard_${k}_${r.id}" class="${cardClass(k, r)}">${calcCardBody(k, r)}</div>`).join('');
+      }
+      const cb = document.getElementById('calcExpand_' + k);
+      if (cb) cb.checked = calcState[k].expand;
+      renderCalcSummary(k);
+    }
+    function cardClass(k, r) {
+      const on = (calcState[k].counts[r.id] || 0) > 0;
+      return 'p-3 rounded-lg bg-[#161920] border transition ' + (on ? 'border-[#E5A93C]/70' : 'border-[#323846] hover:border-[#E5A93C]/40');
+    }
+
+    function renderCalcSummary(k) {
+      const box = document.getElementById('calcSummary_' + k);
+      if (!box) return;
+      const res = computeCalc(k), st = calcState[k];
+      const planned = CALCS[k].recipes.filter(r => (st.counts[r.id] || 0) > 0);
+      let body;
+      if (!res.any) {
+        body = '<p class="text-sm text-[#8E96A8]">尚未輸入任何份數。在上方卡片輸入製作次數，這裡會加總所有材料。</p>';
+      } else {
+        body = `
+          <div class="flex flex-wrap gap-1.5 mb-2.5">${planned.map(r => `<span class="text-xs bg-[#E5A93C]/10 text-[#E5A93C] border border-[#E5A93C]/40 px-2 py-0.5 rounded">${r.name} ${st.counts[r.id]} 次 ➔ ${fmtN(st.counts[r.id] * r.yield)} 個</span>`).join('')}</div>
+          ${res.pre.length ? `<div class="mb-2.5 text-xs text-gray-300"><span class="text-[#8E96A8] mr-1">前置製作：</span>${res.pre.map(p => `<span class="inline-block mr-2 mb-1 bg-[#262B36] border border-[#323846] px-2 py-0.5 rounded">${p.name} <b class="text-white">${p.crafts} 次</b><span class="text-[#8E96A8]">（需 ${fmtN(p.need)}，做出 ${fmtN(p.made)}）</span></span>`).join('')}</div>` : ''}
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-1.5">
+            ${res.items.map(([m, n]) => `<div class="flex items-center justify-between gap-2 bg-[#161920] border border-[#323846] rounded px-2 py-1 text-sm"><span class="text-gray-200 truncate">${m}</span><b class="font-mono text-[#E5A93C]">${fmtN(n)}</b></div>`).join('')}
+          </div>
+          ${res.time ? `<div class="mt-2.5 text-xs text-gray-300"><i class="fa-regular fa-hourglass-half text-[#E5A93C] mr-1"></i>總加工時間（逐次累加${st.expand && res.pre.length ? '，含前置製作' : ''}）：<b class="text-white font-mono">${fmtDuration(res.time)}</b></div>` : ''}`;
+      }
+      box.innerHTML = `
+        <div class="bg-[#1E222B] rounded-xl p-3 sm:p-4 shadow border border-[#E5A93C]/50">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#323846] pb-2 mb-2.5">
+            <h3 class="text-base font-bold text-white flex items-center gap-2"><i class="fa-solid fa-boxes-stacked text-[#E5A93C]"></i>總材料需求</h3>
+            <span class="text-[11px] text-[#8E96A8]">${st.expand ? '已展開前置材料（製作次數無條件進位）' : '未展開：中間材料以成品數量列出'}</span>
+          </div>
+          ${body}
+        </div>`;
+    }
+
+    // ===== 分頁 =====
+    const TAB_NAMES = ['tracker', 'cooking', 'craft', 'potion', 'barter'];
+    function showTab(tab) {
+      if (!TAB_NAMES.includes(tab)) tab = 'tracker';
+      document.querySelectorAll('[data-tab-panel]').forEach(el => el.classList.toggle('hidden', el.dataset.tabPanel !== tab));
+      document.querySelectorAll('#tabBar [data-tab]').forEach(b => {
+        const on = b.dataset.tab === tab;
+        b.classList.toggle('active', on);
+        if (on && b.scrollIntoView) b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      });
+      localStorage.setItem('mabi_tab', tab);
+      return tab;
+    }
+    let currentTab = null;
+    function switchTab(tab) {
+      if (tab === currentTab) return;
+      currentTab = showTab(tab);
+      if (location.hash !== '#' + currentTab) history.replaceState(null, '', '#' + currentTab);
+      window.scrollTo(0, 0);
+      if (window.gtag) gtag('event', 'tab_view', { tab: currentTab });
+    }
+    window.addEventListener('hashchange', () => {
+      const t = location.hash.slice(1);
+      if (TAB_NAMES.includes(t) && t !== currentTab) switchTab(t);
+    });
+    function initTabs() {
+      const fromHash = location.hash.slice(1);
+      const tab = TAB_NAMES.includes(fromHash) ? fromHash : (TAB_NAMES.includes(localStorage.getItem('mabi_tab')) ? localStorage.getItem('mabi_tab') : 'tracker');
+      currentTab = showTab(tab);
+      if (location.hash !== '#' + tab) history.replaceState(null, '', '#' + tab);
+    }
+
     setViewMode(currentView);
     render();
     renderTodos();
     renderRecipes();
+    renderCalc('craft');
+    renderCalc('potion');
+    initTabs();
     initFirebase();
   </script>
 </body>
